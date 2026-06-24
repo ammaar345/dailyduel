@@ -1,40 +1,39 @@
-import { useEffect, memo } from 'react'
+import { useEffect, useRef, memo } from 'react'
 
-export const AdBanner = memo(() => {
+// Replace YOUR_PLACEMENT_ID with your actual Carbon Ads placement ID
+// Sign up at https://carbonads.net/ -> New Ad Unit -> copy Placement ID
+const CARBON_PLACEMENT_ID = 'YOUR_PLACEMENT_ID'
+
+interface AdBannerProps {
+  className?: string
+}
+
+export const AdBanner = memo(({ className = '' }: AdBannerProps) => {
+  const containerRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
-    // Carbon Ads integration
-    // To get your placement ID:
-    // 1. Sign up at https://carbonads.net/
-    // 2. Create a new ad unit
-    // 3. Replace "YOUR_PLACEMENT_ID" below
-    // 4. Replace "dailyduel.app" with your actual domain
+    if (!containerRef.current || CARBON_PLACEMENT_ID === 'YOUR_PLACEMENT_ID') return
 
     const script = document.createElement('script')
     script.async = true
     script.type = 'text/javascript'
-    script.src = `https://cdn.carbonads.com/carbon.js?serve=YOUR_PLACEMENT_ID&format=cover`
+    script.src = `https://cdn.carbonads.com/cron.js?serve=${CARBON_PLACEMENT_ID}&format=cover`
     script.id = '_carbonads_js'
-
-    const adContainer = document.getElementById('carbonads')
-    if (adContainer) {
-      adContainer.appendChild(script)
-    }
+    containerRef.current.appendChild(script)
 
     return () => {
-      if (adContainer && script.parentNode) {
+      if (script.parentNode) {
         script.parentNode.removeChild(script)
       }
     }
   }, [])
 
+  // Don't render anything if no placement ID configured
+  if (CARBON_PLACEMENT_ID === 'YOUR_PLACEMENT_ID') return null
+
   return (
-    <div className="mb-6">
-      <div id="carbonads" className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-        {/* Carbon ad will be inserted here by the script */}
-        <div className="text-center text-xs text-gray-500 mb-2">
-          <span className="font-semibold">Advertisement</span>
-        </div>
-      </div>
+    <div className={`mb-4 ${className}`}>
+      <div ref={containerRef} id="carbonads" />
     </div>
   )
 })
