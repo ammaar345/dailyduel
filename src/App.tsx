@@ -21,7 +21,12 @@ export default function App() {
   }, [stats])
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', settings.contrast === 'dark')
+    // Remove all contrast classes first
+    document.documentElement.classList.remove('high', 'soft', 'dark')
+    // Add the current contrast class
+    if (settings.contrast !== 'medium') {
+      document.documentElement.classList.add(settings.contrast)
+    }
   }, [settings.contrast])
 
   const handleWin = (timeMs: number) => {

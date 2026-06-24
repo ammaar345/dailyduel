@@ -14,13 +14,13 @@ export function DuelBoard({ playerName, guesses, currentGuess, isCurrentPlayer, 
   return (
     <div className={`flex flex-col items-center gap-2 p-3 rounded-3xl border-2 transition-all duration-300 ${
       isCurrentPlayer
-        ? 'border-indigo-300 bg-indigo-50/80 shadow-md'
-        : 'border-slate-200 bg-white/60'
+        ? 'border-[#90CAF9] bg-[#E3F2FD] shadow-md'
+        : 'border-[#E8E4DF] bg-[#F8FAFB]'
     } ${solved ? 'animate-pulse-soft' : ''}`}>
       <div className="flex items-center gap-2 mb-1">
-        {solved && <CrownIcon size={22} className="text-amber-400 animate-float" />}
-        <span className={`text-xs font-bold tracking-wider uppercase ${
-          isCurrentPlayer ? 'text-indigo-500' : 'text-slate-400'
+        {solved && <CrownIcon size={22} className="text-[#FFD54F] animate-float" />}
+        <span className={`text-xs font-semibold tracking-wider uppercase ${
+          isCurrentPlayer ? 'text-[#64B5F6]' : 'text-[#A0AEC0]'
         }`}>
           {playerName}
         </span>

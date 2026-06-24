@@ -50,7 +50,6 @@ export function getAllWords(): readonly string[] {
 }
 
 export function isValidWord(word: string): boolean {
-  // For MVP, accept any 5-letter combination
-  // In production, check against a real dictionary
-  return word.length === 5
+  // Check if word is 5 letters and exists in our curated list
+  return word.length === 5 && UNIQUE_WORDS.includes(word.toUpperCase())
 }

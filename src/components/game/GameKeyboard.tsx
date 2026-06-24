@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useEffect } from 'react'
 
 interface GameKeyboardProps {
   onKey: (key: string) => void
@@ -11,16 +11,35 @@ const ROWS = [
   ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫'],
 ]
 
-function getKeyStyle(state?: string): string {
+function getKeyColors(state?: string): { bg: string; text: string; border?: string } {
   switch (state) {
-    case 'correct': return 'bg-emerald-400 text-white shadow-sm'
-    case 'present': return 'bg-amber-400 text-white shadow-sm'
-    case 'absent': return 'bg-slate-200 text-slate-400'
-    default: return 'bg-white text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200'
+    case 'correct': return { bg: 'var(--tile-correct-border, #81C784)', text: 'var(--tile-correct-text, #FFFFFF)' }
+    case 'present': return { bg: 'var(--tile-present-border, #FFD54F)', text: 'var(--tile-present-text, #4A5568)' }
+    case 'absent': return { bg: 'var(--tile-absent)', text: 'var(--tile-absent-text)' }
+    default: return { bg: 'var(--tile-empty)', text: 'var(--text-primary)', border: 'var(--tile-empty-border)' }
   }
 }
 
 function GameKeyboardInner({ onKey, keyStates }: GameKeyboardProps) {
+  const handleClick = (key: string) => {
+    const button = document.querySelector(`button[data-key="${key}"]`)
+    button?.classList.add('pressed')
+    setTimeout(() => button?.classList.remove('pressed'), 200)
+    onKey(key)
+  }
+
+  // Add click animation to on-screen keyboard when pressed
+  useEffect(() => {
+    const handlePhysicalKey = (e: KeyboardEvent) => {
+      const key = e.key === 'Enter' ? 'ENTER' : e.key === 'Backspace' ? '⌫' : e.key.toUpperCase()
+      const button = document.querySelector(`button[data-key="${key}"]`)
+      button?.classList.add('pressed')
+      setTimeout(() => button?.classList.remove('pressed'), 200)
+    }
+    window.addEventListener('keydown', handlePhysicalKey)
+    return () => window.removeEventListener('keydown', handlePhysicalKey)
+  }, [])
+
   return (
     <div className="flex flex-col gap-1.5 items-center mt-4">
       {ROWS.map((row, rowIdx) => (
@@ -28,19 +47,24 @@ function GameKeyboardInner({ onKey, keyStates }: GameKeyboardProps) {
           {row.map((key) => {
             const isWide = key === 'ENTER' || key === '⌫'
             const state = keyStates[key]
-            const style = getKeyStyle(state)
+            const colors = getKeyColors(state)
 
             return (
               <button
                 key={key}
-                onClick={() => onKey(key)}
+                data-key={key}
+                onClick={() => handleClick(key)}
                 className={`
-                  kb-key h-14 font-bold text-sm
+                  kb-key h-14 font-semibold text-sm
                   flex items-center justify-center cursor-pointer
                   select-none
                   ${isWide ? 'w-[68px] text-xs' : 'w-10'}
-                  ${style}
                 `}
+                style={{
+                  background: colors.bg,
+                  color: colors.text,
+                  border: colors.border ? `1.5px solid ${colors.border}` : 'none',
+                }}
               >
                 {key === '⌫' ? (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

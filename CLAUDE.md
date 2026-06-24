@@ -12,11 +12,20 @@ DailyDuel is a competitive daily word puzzle game where two players race to solv
 ## What's Built (V0.1 — June 23, 2026)
 
 ### Homepage
-- Animated crown hero
-- Rank card with XP bar + level display
-- Win / streak / best-time stat cards
-- Navigation to Practice and Duel modes
-- Settings button
+- Animated crown hero (cloud-like float animation, darker gold `#E8B830`)
+- Rank card with XP bar + level display (clickable → opens XP modal)
+- Stat cards: Wins (Trophy), Streak (Heart), Best (Fire) — each in tinted rounded-square icon container, hover-wiggle animation, JetBrains Mono numbers
+- Practice Mode button (lighter blue gradient `#BBDEFB → #64B5F6`, TargetIcon)
+- Start Duel button (white secondary, CrossedSwordsIcon)
+- Animated settings button (gear rotates 90° on hover, pill background)
+- XP Detail Modal: shows level, XP bar, total XP, games played, wins, max streak
+
+### Design System
+- Palette: cream `#F8F6F2`, baby blue `#90CAF9 / #64B5F6`, mint `#80CBC4`, lavender `#B39DDB`, amber `#FFD54F`
+- Fonts: Fredoka (headings/labels), JetBrains Mono (stat numbers, XP display)
+- Icons: 15 custom bubbly SVG components (CrownIcon, TrophyIcon, HeartIcon, FireIcon, SwordIcon, TargetIcon, CrossedSwordsIcon, StarIcon, GearIcon, BackIcon, CloseIcon, ClipboardIcon, SkullIcon, PlayIcon, XIcon)
+- Animations: float-cloud (gentle drift), icon-wiggle, group-hover-scale, heart-beat, shadow-pulse
+- CSS utility classes: `.marsh-card`, `.marsh-btn`, `.marsh-btn-primary`, `.marsh-btn-secondary`, `.kb-key`, `.tile-dither`, `.font-mono-nums`
 
 ### Practice Mode
 - 5-letter Wordle-style board (6 guesses)
@@ -58,7 +67,7 @@ DailyDuel is a competitive daily word puzzle game where two players race to solv
 src/
 ├── main.tsx                     # Entry point
 ├── App.tsx                      # Router + state management
-├── index.css                    # Tailwind v4 + animations + dither overlay
+├── index.css                    # Tailwind v4 + design tokens + animations + utilities
 ├── vite-env.d.ts                # Vite type declarations
 ├── components/
 │   ├── game/
@@ -68,7 +77,9 @@ src/
 │   │   ├── DuelBoard.tsx        # Compact board for side-by-side duels
 │   │   └── ResultScreen.tsx     # Win/loss overlay with stats + share
 │   └── ui/
-│       └── SettingsDialog.tsx   # Sound/theme/animation settings
+│       ├── Icons.tsx            # 15 custom bubbly SVG icon components
+│       ├── SettingsDialog.tsx   # Sound/theme/animation settings
+│       └── XpModal.tsx          # XP detail modal (level, XP bar, stats)
 ├── lib/
 │   ├── words.ts                 # 80+ curated 5-letter words, date-seeded
 │   ├── daily.ts                 # Puzzle generation, guess checking, validation
@@ -77,7 +88,7 @@ src/
 │   ├── settings.ts              # Settings load/save with defaults
 │   └── sounds.ts                # Web Audio API sound effects
 └── pages/
-    ├── HomePage.tsx             # Main menu with stats
+    ├── HomePage.tsx             # Main menu with stats, XP modal trigger
     ├── PracticePage.tsx         # Single-player practice
     └── DuelPage.tsx             # 1v1 duel vs bot
 ```
@@ -97,11 +108,18 @@ src/
 - Settings: sound, theme, animations all functional
 - Share: copies emoji grid to clipboard on win/loss
 - TypeScript: zero compilation errors, clean build
+- Dictionary: curated word list with 80+ words across categories
+- Bot AI: randomized bot behavior in practice mode (random guesses every 2-5s, solves after 10-25s)
+- Contrasting theme colors: 4 modes (medium, high, soft, dark) with distinct color schemes
+- Real word validation: only accepts words from curated list
+- Keyboard animations: both on-screen and physical keyboard buttons animate on press
+- Theme-specific keyboard colors: keyboard changes colors based on active theme
+- Dark mode navy blue theme: dark blue background with appropriate tile colors
 
 ### What's NOT Built Yet
 - Real-time PvP (WebRTC) — bot is placeholder
 - Room creation/joining via shareable link
-- Dictionary validation (currently accepts any 5 letters)
+- WebRTC implementation for real human opponents
 - Battle pass / cosmetic shop
 - Carbon Ads / Gumroad integration
 - Friends list / rivalry tracking
@@ -109,6 +127,11 @@ src/
 - Tournament mode
 - Mobile responsive (works but not optimized)
 - GitHub Pages deployment
+
+### Future Updates (Priority Queue)
+- **Timer sound**: play a tick sound on each second during practice/duel timer
+- **Real matchmaking**: replace bot with real human opponents (WebRTC + signaling server)
+- **Color key legend**: visible guide showing what green/yellow/gray mean (right place, wrong place/right letter, absent) — decent size so it's noticeable on-screen
 
 ---
 
@@ -268,11 +291,11 @@ src/
 
 ### Phase 1 (V1.0)
 - ✅ Daily puzzles
-- ✅ Real-time duels
 - ✅ Practice mode
 - ✅ Basic stats
-- ✅ Ad monetization
-- ✅ Gumroad integration
+- 🔲 Real-time PvP (WebRTC not implemented yet - bot is placeholder)
+- 🔲 Ad monetization (Carbon Ads not implemented yet)
+- 🔲 Gumroad integration (not implemented yet)
 
 ### Phase 2 (V1.5)
 - 🔄 Tournaments
@@ -602,3 +625,56 @@ DailyDuel combines the proven daily game model with competitive gameplay to crea
 - Leaderboard (friends, global, regional)
 - Seasonal resets every 3 months
 - Daily login reward (bonus XP)
+
+## Recent Updates & Fixes
+
+### ✅ Completed Features (June 23-24, 2026)
+
+**UI Enhancements**
+- Added 4 distinct contrast themes (medium, high, soft, dark) with unique color schemes
+  - Medium: Original marshmallow palette (#F8F6F2 cream background)
+  - High: Vibrant colors with stronger contrast (#F8F6F2 cream background)
+  - Soft: Muted pastels with taupe background (#F5F2ED cream variation)
+  - Dark: Navy blue theme with dark background (#0D1B2A) and appropriate tile colors
+- Enhanced tile color differentiation for better visual feedback
+- Updated keyboard to use CSS variables for seamless theme integration
+- Added proper cream background colors for all themes
+- Fixed keyboard animations to work with both on-screen and physical keyboard
+- Keyboard now animates when player types using data-key attribute selection
+- Added keyboard-specific CSS classes for each theme state (correct/present/absent)
+
+**Gameplay Improvements**
+- Implemented dictionary validation using curated word list (80+ words across categories)
+- Added bot AI to practice mode with randomized behavior:
+  - Makes random guesses every 2-5 seconds
+  - Solves puzzle after 10-25 seconds
+  - Shows progress in real-time
+- Real word validation: Only accepts words from curated list, rejects invalid guesses with shake animation
+
+**Keyboard & Animations**
+- Fixed keyboard text visibility in all contrast modes
+- Added keyboard animations for both on-screen and physical keyboard
+- Implemented theme-specific keyboard colors that change with contrast modes
+- Added press animation (0.92 scale) for better tactile feedback
+- Fixed keyboard animation trigger by adding data-key attributes for proper element selection
+- Keyboard now properly animates on both virtual clicks and physical key presses
+
+**Technical Fixes**
+- Fixed contrast mode application in App.tsx (properly applies high/soft/dark classes)
+- Updated CSS variables to ensure consistent colors across components
+- Enhanced Web Audio API sounds for better user experience
+- Improved theme switching performance
+
+**Documentation**
+- Updated CLAUDE.md with all current features and fixes
+- Removed outdated "Dictionary validation" from TODO (now implemented)
+- Added completed features to "What Works Now" section
+
+### 🔧 Current Status
+- Core gameplay features are fully functional
+- All contrast modes work properly with distinct visual styles
+- Practice mode includes bot opponent for solo play
+- Word validation ensures only valid words can be entered
+- Keyboard animations work for both on-screen and physical keyboard
+- All themes have proper cream background colors
+- Ready for real WebRTC implementation for human vs human duels

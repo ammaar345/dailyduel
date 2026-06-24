@@ -6,34 +6,38 @@ interface TileProps {
   delay?: number
 }
 
-function getTileStyle(status: string): string {
+function getTileStyle(status: string): { bg: string; border: string; text: string } {
   switch (status) {
     case 'correct':
-      return 'bg-emerald-100 border-2 border-emerald-300 text-emerald-700 shadow-sm'
+      return { bg: 'var(--tile-correct)', border: 'var(--tile-correct-border)', text: 'var(--tile-correct-text)' }
     case 'present':
-      return 'bg-amber-100 border-2 border-amber-300 text-amber-700 shadow-sm'
+      return { bg: 'var(--tile-present)', border: 'var(--tile-present-border)', text: 'var(--tile-present-text)' }
     case 'absent':
-      return 'bg-slate-100 border-2 border-slate-200 text-slate-400'
+      return { bg: 'var(--tile-absent)', border: 'var(--tile-absent-border, #CFD8DC)', text: 'var(--tile-absent-text)' }
     default:
-      return 'bg-white border-2 border-slate-200 text-slate-700'
+      return { bg: 'var(--tile-empty, #FFFFFF)', border: 'var(--tile-empty-border, #E8E4DF)', text: 'var(--text-primary, #4A5568)' }
   }
 }
 
 function TileInner({ letter, status, delay = 0 }: TileProps) {
-  const style = status === 'empty' && !letter
-    ? 'bg-white/50 border-2 border-slate-100 text-transparent'
-    : getTileStyle(status)
+  const isEmpty = status === 'empty' && !letter
+  const colors = isEmpty ? null : getTileStyle(status)
 
   return (
     <div
       className={`
         tile-dither relative w-14 h-14 flex items-center justify-center
-        text-2xl font-bold rounded-2xl transition-all duration-200
-        ${style}
+        text-2xl font-semibold rounded-2xl transition-all duration-200 border-2
+        ${isEmpty ? 'bg-[#FAFBFC] border-[#E8E4DF] text-transparent' : ''}
         ${status !== 'empty' ? 'animate-pop-in' : ''}
       `}
       style={{
         animationDelay: status !== 'empty' ? `${delay}ms` : undefined,
+        ...(colors ? {
+          background: colors.bg,
+          borderColor: colors.border,
+          color: colors.text,
+        } : {}),
       }}
     >
       {letter}

@@ -8,6 +8,8 @@ import type { Stats } from '../lib/stats'
 import type { Settings } from '../lib/settings'
 import { playKeyClick, playBackspace, playCorrect, playWin, playLose, playClick } from '../lib/sounds'
 import { BackIcon } from '../components/ui/Icons'
+import { ColorKey } from '../components/game/ColorKey'
+import { AdBanner } from '../components/ui/AdBanner'
 
 interface DuelPageProps {
   puzzle: Puzzle
@@ -105,10 +107,18 @@ export function DuelPage({ puzzle, settings, stats, onBack }: DuelPageProps) {
     })
   }, [started, player.gameStatus, puzzle.word, settings.sound])
 
-  // Physical keyboard
+  // Physical keyboard with animations
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (!started || player.gameStatus !== 'playing') return
+
+      // Add visual feedback for physical key presses
+      const key = e.key === 'Enter' ? 'ENTER' : e.key === 'Backspace' ? '⌫' : e.key.toUpperCase()
+      const button = document.querySelector(`button[onclick*="${key}"]`)
+      button?.classList.add('pressed')
+      setTimeout(() => button?.classList.remove('pressed'), 200)
+
+      // Handle the key
       if (e.key === 'Enter') handleKey('ENTER')
       else if (e.key === 'Backspace') handleKey('⌫')
       else if (/^[a-zA-Z]$/.test(e.key)) handleKey(e.key.toUpperCase())
@@ -137,18 +147,18 @@ export function DuelPage({ puzzle, settings, stats, onBack }: DuelPageProps) {
             if (settings.sound) playClick()
             onBack()
           }}
-          className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-indigo-400 transition-colors cursor-pointer"
+          className="w-10 h-10 flex items-center justify-center text-[#A0AEC0] hover:text-[#90CAF9] transition-colors cursor-pointer"
         >
           <BackIcon size={24} />
         </button>
-        <h1 className="text-lg font-black tracking-tight text-indigo-400 uppercase">Duel Mode</h1>
+        <h1 className="text-lg font-bold tracking-tight text-[#64B5F6] uppercase">Duel Mode</h1>
         <div className="w-10" />
       </div>
 
       {/* Countdown */}
       {!started && (
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-8xl font-black text-indigo-400 animate-bounce-in drop-shadow-lg">
+          <div className="text-8xl font-bold text-[#90CAF9] animate-bounce-in drop-shadow-lg">
             {countdown > 0 ? countdown : 'GO!'}
           </div>
         </div>
@@ -174,9 +184,19 @@ export function DuelPage({ puzzle, settings, stats, onBack }: DuelPageProps) {
         </div>
       )}
 
+      {/* Ad Banner - Shown during duels */}
+      <AdBanner />
+
+      {/* Color Key Legend */}
+      {started && (
+        <div className="w-full mt-3 mb-1">
+          <ColorKey />
+        </div>
+      )}
+
       {/* Keyboard */}
       {started && (
-        <div className="mt-4">
+        <div className="mt-2">
           <GameKeyboard
             onKey={handleKey}
             keyStates={getKeyStates(player.guesses)}

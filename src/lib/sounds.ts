@@ -23,8 +23,11 @@ function playTone(freq: number, duration: number, type: OscillatorType = 'sine',
   }
 }
 
+// ASMR gentle keyboard sound — softer, more natural typing feel
 export function playKeyClick() {
-  playTone(800, 0.05, 'square', 0.15)
+  // Two-note tap for natural keyboard feel (1 keypress = 2 sounds)
+  playTone(1500, 0.02, 'sine', 0.1)  // High soft tap
+  setTimeout(() => playTone(1200, 0.02, 'sine', 0.1), 15)  // Lower muffled tap
 }
 
 export function playBackspace() {

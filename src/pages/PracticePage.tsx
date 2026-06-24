@@ -8,6 +8,8 @@ import type { Stats } from '../lib/stats'
 import type { Settings } from '../lib/settings'
 import { playKeyClick, playBackspace, playCorrect, playPresent, playAbsent, playWin, playLose, playClick } from '../lib/sounds'
 import { BackIcon, GearIcon } from '../components/ui/Icons'
+import { ColorKey } from '../components/game/ColorKey'
+import { AdBanner } from '../components/ui/AdBanner'
 
 interface PracticePageProps {
   puzzle: Puzzle
@@ -23,6 +25,7 @@ export function PracticePage({ puzzle, settings, stats, onWin, onLoss, onBack, o
   const [game, setGame] = useState(createGameState)
   const [shakeRow, setShakeRow] = useState<number | null>(null)
 
+  
   const handleKey = useCallback((key: string) => {
     setGame(prev => {
       if (prev.gameStatus !== 'playing') return prev
@@ -48,10 +51,18 @@ export function PracticePage({ puzzle, settings, stats, onWin, onLoss, onBack, o
     if (game.gameStatus === 'lost') onLoss()
   }, [game.gameStatus, game.elapsedMs, onWin, onLoss])
 
-  // Physical keyboard
+  // Physical keyboard with animations
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (game.gameStatus !== 'playing') return
+
+      // Add visual feedback for physical key presses
+      const key = e.key === 'Enter' ? 'ENTER' : e.key === 'Backspace' ? '⌫' : e.key.toUpperCase()
+      const button = document.querySelector(`button[onclick*="${key}"]`)
+      button?.classList.add('pressed')
+      setTimeout(() => button?.classList.remove('pressed'), 200)
+
+      // Handle the key
       if (e.key === 'Enter') handleKey('ENTER')
       else if (e.key === 'Backspace') handleKey('⌫')
       else if (/^[a-zA-Z]$/.test(e.key)) handleKey(e.key.toUpperCase())
@@ -81,17 +92,17 @@ export function PracticePage({ puzzle, settings, stats, onWin, onLoss, onBack, o
             if (settings.sound) playClick()
             onBack()
           }}
-          className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-indigo-400 transition-colors cursor-pointer"
+          className="w-10 h-10 flex items-center justify-center text-[#A0AEC0] hover:text-[#90CAF9] transition-colors cursor-pointer"
         >
           <BackIcon size={24} />
         </button>
-        <h1 className="text-lg font-black tracking-tight text-slate-600 uppercase">Practice</h1>
+        <h1 className="text-lg font-bold tracking-tight text-[#4A5568] uppercase">Practice</h1>
         <button
           onClick={() => {
             if (settings.sound) playClick()
             onSettings()
           }}
-          className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-indigo-400 transition-colors cursor-pointer"
+          className="w-10 h-10 flex items-center justify-center text-[#A0AEC0] hover:text-[#90CAF9] transition-colors cursor-pointer"
         >
           <GearIcon size={20} />
         </button>
@@ -99,10 +110,13 @@ export function PracticePage({ puzzle, settings, stats, onWin, onLoss, onBack, o
 
       {/* Date badge */}
       <div className="marsh-card px-4 py-1.5 mb-5">
-        <span className="text-xs text-slate-400 tracking-widest uppercase font-bold">
+        <span className="text-xs text-[#718096] tracking-widest uppercase font-medium">
           {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
         </span>
       </div>
+
+      {/* Ad Banner - Shown during practice games */}
+      <AdBanner />
 
       {/* Board */}
       <div className="mb-4">
@@ -112,6 +126,11 @@ export function PracticePage({ puzzle, settings, stats, onWin, onLoss, onBack, o
           maxGuesses={6}
           shakeRow={shakeRow}
         />
+      </div>
+
+      {/* Color Key Legend */}
+      <div className="mb-4">
+        <ColorKey />
       </div>
 
       {/* Keyboard */}
