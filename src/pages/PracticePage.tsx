@@ -7,6 +7,7 @@ import type { Puzzle } from '../lib/daily'
 import type { Stats } from '../lib/stats'
 import type { Settings } from '../lib/settings'
 import { playKeyClick, playBackspace, playCorrect, playPresent, playAbsent, playWin, playLose, playClick } from '../lib/sounds'
+import { BackIcon, GearIcon } from '../components/ui/Icons'
 
 interface PracticePageProps {
   puzzle: Puzzle
@@ -80,27 +81,27 @@ export function PracticePage({ puzzle, settings, stats, onWin, onLoss, onBack, o
             if (settings.sound) playClick()
             onBack()
           }}
-          className="text-zinc-500 hover:text-white transition-colors cursor-pointer text-2xl"
+          className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-indigo-400 transition-colors cursor-pointer"
         >
-          ←
+          <BackIcon size={24} />
         </button>
-        <h1 className="text-xl font-black tracking-tight">
-          PRACTICE
-        </h1>
+        <h1 className="text-lg font-black tracking-tight text-slate-600 uppercase">Practice</h1>
         <button
           onClick={() => {
             if (settings.sound) playClick()
             onSettings()
           }}
-          className="text-zinc-500 hover:text-white transition-colors cursor-pointer text-2xl"
+          className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-indigo-400 transition-colors cursor-pointer"
         >
-          ⚙
+          <GearIcon size={20} />
         </button>
       </div>
 
       {/* Date badge */}
-      <div className="text-xs text-zinc-600 mb-4 tracking-widest uppercase">
-        {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+      <div className="marsh-card px-4 py-1.5 mb-5">
+        <span className="text-xs text-slate-400 tracking-widest uppercase font-bold">
+          {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+        </span>
       </div>
 
       {/* Board */}

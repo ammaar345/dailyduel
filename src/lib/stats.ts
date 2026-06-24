@@ -58,11 +58,11 @@ export function getRank(level: number): string {
 
 export function getRankColor(rank: string): string {
   switch (rank) {
-    case 'CROWN': return 'text-yellow-400'
-    case 'DIAMOND': return 'text-cyan-400'
-    case 'PLATINUM': return 'text-purple-400'
-    case 'GOLD': return 'text-yellow-500'
-    case 'SILVER': return 'text-gray-300'
-    default: return 'text-amber-600'
+    case 'CROWN': return 'text-amber-500'
+    case 'DIAMOND': return 'text-cyan-500'
+    case 'PLATINUM': return 'text-indigo-400'
+    case 'GOLD': return 'text-amber-400'
+    case 'SILVER': return 'text-slate-400'
+    default: return 'text-amber-400'
   }
 }

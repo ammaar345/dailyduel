@@ -10,7 +10,7 @@ interface GameBoardProps {
 
 export function GameBoard({ guesses, currentGuess, maxGuesses, shakeRow }: GameBoardProps) {
   return (
-    <div className="flex flex-col gap-1.5 items-center">
+    <div className="flex flex-col gap-2 items-center">
       {Array.from({ length: maxGuesses }).map((_, rowIdx) => {
         const guessData = guesses[rowIdx]
         const isCurrentRow = rowIdx === guesses.length
@@ -18,7 +18,7 @@ export function GameBoard({ guesses, currentGuess, maxGuesses, shakeRow }: GameB
         return (
           <div
             key={rowIdx}
-            className={`flex gap-1.5 ${shakeRow === rowIdx ? 'animate-shake' : ''}`}
+            className={`flex gap-2 ${shakeRow === rowIdx ? 'animate-shake' : ''}`}
           >
             {Array.from({ length: 5 }).map((_, colIdx) => {
               if (guessData) {
@@ -27,7 +27,7 @@ export function GameBoard({ guesses, currentGuess, maxGuesses, shakeRow }: GameB
                     key={colIdx}
                     letter={guessData.word[colIdx] ?? ''}
                     status={guessData.result[colIdx]}
-                    delay={colIdx * 100}
+                    delay={colIdx * 80}
                   />
                 )
               }

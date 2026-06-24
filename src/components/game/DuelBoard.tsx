@@ -1,5 +1,6 @@
 import { Tile } from './Tile'
 import type { guess } from '../../lib/gameLogic'
+import { CrownIcon } from '../ui/Icons'
 
 interface DuelBoardProps {
   playerName: string
@@ -11,13 +12,15 @@ interface DuelBoardProps {
 
 export function DuelBoard({ playerName, guesses, currentGuess, isCurrentPlayer, solved }: DuelBoardProps) {
   return (
-    <div className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 ${
-      isCurrentPlayer ? 'border-purple-500 bg-purple-500/10' : 'border-zinc-700 bg-zinc-900'
-    } ${solved ? 'animate-pulse-glow' : ''}`}>
+    <div className={`flex flex-col items-center gap-2 p-3 rounded-3xl border-2 transition-all duration-300 ${
+      isCurrentPlayer
+        ? 'border-indigo-300 bg-indigo-50/80 shadow-md'
+        : 'border-slate-200 bg-white/60'
+    } ${solved ? 'animate-pulse-soft' : ''}`}>
       <div className="flex items-center gap-2 mb-1">
-        {solved && <span className="text-2xl animate-crown">👑</span>}
-        <span className={`text-sm font-bold tracking-wider ${
-          isCurrentPlayer ? 'text-purple-400' : 'text-zinc-400'
+        {solved && <CrownIcon size={22} className="text-amber-400 animate-float" />}
+        <span className={`text-xs font-bold tracking-wider uppercase ${
+          isCurrentPlayer ? 'text-indigo-500' : 'text-slate-400'
         }`}>
           {playerName}
         </span>

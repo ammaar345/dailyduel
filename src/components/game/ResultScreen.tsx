@@ -1,4 +1,5 @@
 import { getRank, getRankColor } from '../../lib/stats'
+import { CrownIcon, SkullIcon, ClipboardIcon, TrophyIcon, StarIcon, HeartIcon } from '../ui/Icons'
 
 interface ResultScreenProps {
   won: boolean
@@ -20,51 +21,64 @@ export function ResultScreen({ won, timeMs, guesses, opponentName, opponentTime,
     : `${Math.floor(timeMs / 60000)}m ${(Math.floor(timeMs / 1000) % 60)}s`
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-slide-up">
-      <div className="bg-zinc-900 border-2 border-zinc-700 rounded-3xl p-8 max-w-sm w-full mx-4 text-center">
-        {/* Crown / Skull */}
-        <div className="text-6xl mb-4">
-          {won ? '👑' : '💀'}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 backdrop-blur-md animate-slide-up">
+      <div className="bg-white rounded-[28px] p-8 max-w-sm w-full mx-4 text-center shadow-2xl border border-slate-100">
+        {/* Icon */}
+        <div className="mb-4 animate-bounce-in">
+          {won ? (
+            <CrownIcon size={72} className="text-amber-400 mx-auto drop-shadow-md" />
+          ) : (
+            <SkullIcon size={64} className="text-slate-300 mx-auto" />
+          )}
         </div>
 
         {/* Title */}
-        <h2 className="text-3xl font-black mb-2">
-          {won ? 'DUEL WON!' : 'DEFEATED'}
+        <h2 className={`text-3xl font-black mb-2 ${won ? 'text-indigo-500' : 'text-slate-400'}`}>
+          {won ? 'VICTORY!' : 'DEFEATED'}
         </h2>
 
         {won ? (
-          <p className="text-zinc-400 mb-4">
+          <p className="text-slate-400 mb-5 text-sm font-medium">
             {opponentName
-              ? `Beat ${opponentName} by ${(opponentTime! - timeMs) / 1000}s`
+              ? `Beat ${opponentName} by ${((opponentTime! - timeMs) / 1000).toFixed(1)}s`
               : 'Puzzle conquered!'}
           </p>
         ) : (
-          <p className="text-zinc-400 mb-4">
+          <p className="text-slate-400 mb-5 text-sm font-medium">
             {opponentName ? `${opponentName} beat you.` : 'Better luck tomorrow!'}
           </p>
         )}
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-zinc-800 rounded-xl p-3">
-            <div className="text-2xl font-black">{timeStr}</div>
-            <div className="text-xs text-zinc-500 uppercase tracking-wider">Time</div>
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="marsh-card p-3">
+            <div className="flex justify-center mb-1">
+              <StarIcon size={14} className="text-indigo-400" />
+            </div>
+            <div className="text-xl font-black text-slate-700">{timeStr}</div>
+            <div className="text-xs text-slate-400 uppercase tracking-wider font-bold">Time</div>
           </div>
-          <div className="bg-zinc-800 rounded-xl p-3">
-            <div className="text-2xl font-black">{guesses}/6</div>
-            <div className="text-xs text-zinc-500 uppercase tracking-wider">Guesses</div>
+          <div className="marsh-card p-3">
+            <div className="flex justify-center mb-1">
+              <TrophyIcon size={14} className="text-amber-400" />
+            </div>
+            <div className="text-xl font-black text-slate-700">{guesses}/6</div>
+            <div className="text-xs text-slate-400 uppercase tracking-wider font-bold">Guesses</div>
           </div>
-          <div className="bg-zinc-800 rounded-xl p-3">
-            <div className={`text-2xl font-black ${rankColor}`}>{rank}</div>
-            <div className="text-xs text-zinc-500 uppercase tracking-wider">Rank</div>
+          <div className="marsh-card p-3">
+            <div className="flex justify-center mb-1">
+              <CrownIcon size={14} className={rankColor} />
+            </div>
+            <div className={`text-xl font-black ${rankColor}`}>{rank}</div>
+            <div className="text-xs text-slate-400 uppercase tracking-wider font-bold">Rank</div>
           </div>
         </div>
 
         {/* Streak */}
         {stats.currentStreak > 0 && (
-          <div className="flex items-center justify-center gap-2 mb-4 text-orange-400">
-            <span className="animate-fire text-xl">🔥</span>
-            <span className="font-bold">{stats.currentStreak} day streak</span>
+          <div className="flex items-center justify-center gap-2 mb-5 text-rose-400">
+            <HeartIcon size={18} className="animate-heart-beat" />
+            <span className="font-bold text-sm">{stats.currentStreak} day streak</span>
           </div>
         )}
 
@@ -72,20 +86,23 @@ export function ResultScreen({ won, timeMs, guesses, opponentName, opponentTime,
         <div className="flex flex-col gap-3">
           <button
             onClick={onShare}
-            className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl transition-colors cursor-pointer"
+            className="marsh-btn marsh-btn-primary w-full py-3.5"
           >
-            Share Result 📋
+            <span className="flex items-center justify-center gap-2">
+              <ClipboardIcon size={18} className="text-white" />
+              Share Result
+            </span>
           </button>
           <div className="flex gap-3">
             <button
               onClick={onPlayAgain}
-              className="flex-1 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-xl transition-colors cursor-pointer"
+              className="marsh-btn marsh-btn-secondary flex-1 py-3.5"
             >
-              Practice Again
+              Play Again
             </button>
             <button
               onClick={onHome}
-              className="flex-1 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-xl transition-colors cursor-pointer"
+              className="marsh-btn marsh-btn-secondary flex-1 py-3.5"
             >
               Home
             </button>

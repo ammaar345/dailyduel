@@ -7,6 +7,7 @@ import type { Puzzle } from '../lib/daily'
 import type { Stats } from '../lib/stats'
 import type { Settings } from '../lib/settings'
 import { playKeyClick, playBackspace, playCorrect, playWin, playLose, playClick } from '../lib/sounds'
+import { BackIcon } from '../components/ui/Icons'
 
 interface DuelPageProps {
   puzzle: Puzzle
@@ -120,7 +121,7 @@ export function DuelPage({ puzzle, settings, stats, onBack }: DuelPageProps) {
     const emojiMap = { correct: '🟩', present: '🟨', absent: '⬛' }
     const grid = player.guesses.map(g => g.result.map(r => emojiMap[r]).join('')).join('\n')
     const result = playerWon === true ? 'WON' : playerWon === false ? 'LOST' : 'DRAW'
-    const text = `DailyDuel ⚔️\n${result} in ${player.guesses.length} guesses\n\n${grid}\n\ndailyduel.app`
+    const text = `DailyDuel Duel\n${result} in ${player.guesses.length} guesses\n\n${grid}\n\ndailyduel.app`
     navigator.clipboard.writeText(text).catch(() => {})
   }
 
@@ -136,18 +137,18 @@ export function DuelPage({ puzzle, settings, stats, onBack }: DuelPageProps) {
             if (settings.sound) playClick()
             onBack()
           }}
-          className="text-zinc-500 hover:text-white transition-colors cursor-pointer text-2xl"
+          className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-indigo-400 transition-colors cursor-pointer"
         >
-          ←
+          <BackIcon size={24} />
         </button>
-        <h1 className="text-xl font-black tracking-tight text-purple-400">DUEL MODE</h1>
-        <div className="w-8" />
+        <h1 className="text-lg font-black tracking-tight text-indigo-400 uppercase">Duel Mode</h1>
+        <div className="w-10" />
       </div>
 
       {/* Countdown */}
       {!started && (
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-8xl font-black text-purple-500 animate-pop-in">
+          <div className="text-8xl font-black text-indigo-400 animate-bounce-in drop-shadow-lg">
             {countdown > 0 ? countdown : 'GO!'}
           </div>
         </div>
