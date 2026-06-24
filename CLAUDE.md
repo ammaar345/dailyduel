@@ -1,7 +1,118 @@
 # DailyDuel — Head-to-Head Daily Word Battles
 
 ## Project Overview
-DailyDuel is a competitive daily word puzzle game where two players race to solve the same puzzle. Built on React + TypeScript + Tailwind v4, leveraging the proven daily game model with a unique PvP twist that drives viral sharing.
+DailyDuel is a competitive daily word puzzle game where two players race to solve the same puzzle. Built on React 19 + TypeScript + Tailwind v4 + Vite, leveraging the proven daily game model with a unique PvP twist that drives viral sharing.
+
+**Repo**: https://github.com/ammaar345/dailyduel
+**Branch**: `feature/initial-setup`
+**Dev**: `npm run dev` (localhost:3000)
+
+---
+
+## What's Built (V0.1 — June 23, 2026)
+
+### Homepage
+- Animated crown hero
+- Rank card with XP bar + level display
+- Win / streak / best-time stat cards
+- Navigation to Practice and Duel modes
+- Settings button
+
+### Practice Mode
+- 5-letter Wordle-style board (6 guesses)
+- On-screen keyboard with color feedback (green/yellow/zinc)
+- Physical keyboard support
+- Daily puzzle seeded from date (same word for everyone)
+- Win/loss result screen with time, guesses, rank, share to clipboard
+- Shake animation on invalid guess
+- Tile pop-in animations with staggered delays
+- Web Audio API sounds (key click, backspace, correct, present, absent, win, lose)
+
+### Duel Mode
+- 3-2-1 countdown before race
+- Side-by-side boards: YOU vs RIVAL BOT
+- Bot opponent with randomized solve time (8-20s)
+- Real-time board updates as both play
+- Crown animation on solved board
+- Win/loss result screen with opponent comparison + share
+
+### Settings
+- Sound toggle + volume slider
+- 4 contrast themes (medium, high, soft, dark)
+- Animations toggle
+
+### Progression System (LocalStorage)
+- XP earned from every game
+- Level-up system (100 XP per level)
+- Ranks: Bronze > Silver > Gold > Platinum > Diamond > Crown
+- Win streak tracking with fire emoji
+
+### Sound Engine
+- Web Audio API oscillator-based (zero external files)
+- Key clicks, backspace, enter, correct/present/absent feedback
+- Win fanfare (ascending notes), lose drone
+- Click sound for navigation
+
+### Actual File Structure
+```
+src/
+├── main.tsx                     # Entry point
+├── App.tsx                      # Router + state management
+├── index.css                    # Tailwind v4 + animations + dither overlay
+├── vite-env.d.ts                # Vite type declarations
+├── components/
+│   ├── game/
+│   │   ├── Tile.tsx             # Letter tile with status color + dither
+│   │   ├── GameBoard.tsx        # 5x6 grid (practice mode)
+│   │   ├── GameKeyboard.tsx     # On-screen keyboard with color states
+│   │   ├── DuelBoard.tsx        # Compact board for side-by-side duels
+│   │   └── ResultScreen.tsx     # Win/loss overlay with stats + share
+│   └── ui/
+│       └── SettingsDialog.tsx   # Sound/theme/animation settings
+├── lib/
+│   ├── words.ts                 # 80+ curated 5-letter words, date-seeded
+│   ├── daily.ts                 # Puzzle generation, guess checking, validation
+│   ├── gameLogic.ts             # Game state machine, key handling, win/loss
+│   ├── stats.ts                 # Stats load/save, XP, rank calculation
+│   ├── settings.ts              # Settings load/save with defaults
+│   └── sounds.ts                # Web Audio API sound effects
+└── pages/
+    ├── HomePage.tsx             # Main menu with stats
+    ├── PracticePage.tsx         # Single-player practice
+    └── DuelPage.tsx             # 1v1 duel vs bot
+```
+
+### Tech Notes
+- Tailwind v4 (`@import "tailwindcss"`, no config file)
+- Tile dither via CSS SVG background pattern
+- CSS animations: pop-in, shake, slide-up, pulse-glow, crown-bounce, fire-flicker
+- Date-seeded puzzle (same word for everyone on same day)
+- Word list: 80+ 5-letter words across categories (animals, nature, tech, food, actions, colors, abstract, objects)
+- No external audio files — all sounds generated via Web Audio API oscillators
+
+### What Works Now
+- Practice mode: fully playable Wordle clone with sounds + stats
+- Duel mode: race a bot on the same daily puzzle, side-by-side boards
+- Progression: XP, levels, ranks, streaks all persist in LocalStorage
+- Settings: sound, theme, animations all functional
+- Share: copies emoji grid to clipboard on win/loss
+- TypeScript: zero compilation errors, clean build
+
+### What's NOT Built Yet
+- Real-time PvP (WebRTC) — bot is placeholder
+- Room creation/joining via shareable link
+- Dictionary validation (currently accepts any 5 letters)
+- Battle pass / cosmetic shop
+- Carbon Ads / Gumroad integration
+- Friends list / rivalry tracking
+- Push notifications
+- Tournament mode
+- Mobile responsive (works but not optimized)
+- GitHub Pages deployment
+
+---
+
+## Original Plan (Pre-Build)
 
 ## Core Concept: Real-Time Word Battles
 
@@ -100,30 +211,34 @@ Not another Wordle clone. Two players compete on the exact same puzzle simultane
 src/
 ├── components/
 │   ├── game/
-│   │   ├── Tile.tsx (reused from TrailWord)
-│   │   ├── GameBoard.tsx (reused + duel mode)
-│   │   ├── GameKeyboard.tsx (reused)
-│   │   ├── DuelBoard.tsx (new - side-by-side boards)
-│   │   ├── ResultScreen.tsx (new)
-│   │   └── TournamentBracket.tsx (future)
+│   │   ├── Tile.tsx               ✅ built
+│   │   ├── GameBoard.tsx          ✅ built
+│   │   ├── GameKeyboard.tsx       ✅ built
+│   │   ├── DuelBoard.tsx          ✅ built
+│   │   ├── ResultScreen.tsx       ✅ built
+│   │   └── TournamentBracket.tsx  🔲 future
 │   ├── ui/
-│   │   ├── icons.tsx
-│   │   └── animations.tsx
+│   │   ├── SettingsDialog.tsx     ✅ built
+│   │   ├── icons.tsx              🔲 future
+│   │   └── animations.tsx         🔲 future
 │   └── monetization/
-│       ├── AdBanner.tsx
-│       ├── GumroadButton.tsx
-│       └── PurchaseDialog.tsx
+│       ├── AdBanner.tsx           🔲 future
+│       ├── GumroadButton.tsx      🔲 future
+│       └── PurchaseDialog.tsx     🔲 future
 ├── lib/
-│   ├── words.ts (reused + expand)
-│   ├── daily.ts (reused)
-│   ├── stats.ts (reused + expand)
-│   ├── sounds.ts (reused + enhance)
-│   ├── duel-engine.ts (new)
-│   └── webrtc.ts (new)
+│   ├── words.ts                   ✅ built (80+ words)
+│   ├── daily.ts                   ✅ built
+│   ├── gameLogic.ts               ✅ built
+│   ├── stats.ts                   ✅ built
+│   ├── settings.ts                ✅ built
+│   ├── sounds.ts                  ✅ built
+│   ├── duel-engine.ts             🔲 future (WebRTC)
+│   └── webrtc.ts                  🔲 future (peer-to-peer)
 └── pages/
-    ├── DuelPage.tsx (new)
-    ├── TournamentPage.tsx (future)
-    └── PracticePage.tsx (reused)
+    ├── HomePage.tsx               ✅ built
+    ├── PracticePage.tsx           ✅ built
+    ├── DuelPage.tsx               ✅ built (bot only)
+    └── TournamentPage.tsx         🔲 future
 ```
 
 ## Build Plan (3 Days)
@@ -433,3 +548,57 @@ VIRAL GROWTH + RECURRING REVENUE
 ## Conclusion
 
 DailyDuel combines the proven daily game model with competitive gameplay to create a unique viral experience. The build is fast (3 days), revenue is clear (multiple streams), and the market is ready for something beyond Wordle clones. The key is executing the real-time duel mechanics smoothly and building a strong viral loop through competitive sharing.
+
+---
+
+## What To Do Next (Prioritized)
+
+### 1. Dictionary Validation
+- Add real 5-letter word list (TWL or SOWPODS, ~12K words)
+- Reject invalid guesses with shake + "not a word" toast
+- Keep answer list curated (80+ fun/common words)
+
+### 2. Real WebRTC PvP
+- Replace bot with real human opponent
+- Room creation via shareable link (`dailyduel.app/room/ABC123`)
+- Signaling through Firebase Realtime Database (free tier)
+- Peer-to-peer state sync via WebRTC DataChannel
+- Fallback: "connection lost" + retry if WebRTC fails
+- This is THE viral mechanic — "beat your friend" only works with real friends
+
+### 3. GitHub Pages Deploy
+- `npm run build` -> push `dist/` to `gh-pages` branch
+- Zero-cost hosting, ready to go
+
+### 4. Carbon Ads
+- Header banner (728x90 or responsive)
+- Interstitial after duel results
+- $3-5 RPM for gaming audience
+- Only show to free users (not battle pass holders)
+
+### 5. Battle Pass ($3/Season)
+- Free track: 1 reward every 5 levels (board theme, keyboard skin)
+- Premium track ($3 via Gumroad): exclusive cosmetics, bonus XP, early access
+- 30-day seasons with 30 levels
+- Gumroad integration for purchase + delivery
+
+### 6. Cosmetic Shop
+- Board themes (Matrix green, ocean blue, sunset, monochrome)
+- Crown styles (gold, diamond, fire, neon)
+- Keyboard skins (different colors/layouts)
+- Victory animations (confetti, lightning, fire trail)
+- $1-5 per item via Gumroad
+
+### 7. Social Features
+- Friends list via shareable profile links
+- Rivalry tracking (head-to-head record per friend)
+- "Best of 3/5/7" duel series
+- Spectator mode (watch friends duel live)
+- Weekly challenges ("Win 5 duels this week")
+
+### 8. Retention Mechanics
+- Push notifications for streaks ("Don't break your 7-day streak!")
+- Achievement badges (first win, 10-win streak, sub-5s solve)
+- Leaderboard (friends, global, regional)
+- Seasonal resets every 3 months
+- Daily login reward (bonus XP)
