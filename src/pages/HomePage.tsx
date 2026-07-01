@@ -3,7 +3,7 @@ import type { Stats } from '../lib/stats'
 import type { Settings } from '../lib/settings'
 import { getRank, getRankColor } from '../lib/stats'
 import { playClick } from '../lib/sounds'
-import { CrownIcon, GearIcon, FireIcon, TrophyIcon, HeartIcon, TargetIcon, CrossedSwordsIcon, StarIcon } from '../components/ui/Icons'
+import { CrownIcon, GearIcon, FireIcon, TrophyIcon, HeartIcon, TargetIcon, CrossedSwordsIcon, StarIcon, ClipboardIcon } from '../components/ui/Icons'
 import { XpModal } from '../components/ui/XpModal'
 import { AdBanner } from '../components/ui/AdBanner'
 
@@ -12,6 +12,8 @@ interface HomePageProps {
   settings: Settings
   onNavigate: (page: 'practice' | 'duel' | 'stats' | 'settings') => void
   onSettings: () => void
+  challengeDate?: string | null
+  onChallengeShare?: () => string
 }
 
 function getStreakWeek(): { day: string; played: boolean; won: boolean }[] {
@@ -116,7 +118,7 @@ function Sparkle({ x, y, delay, size }: { x: string; y: string; delay: string; s
   )
 }
 
-export function HomePage({ stats, settings, onNavigate, onSettings }: HomePageProps) {
+export function HomePage({ stats, settings, onNavigate, onSettings, challengeDate, onChallengeShare }: HomePageProps) {
   const [showXpModal, setShowXpModal] = useState(false)
   const rank = getRank(stats.level)
   const rankColor = getRankColor(rank)
@@ -402,6 +404,41 @@ export function HomePage({ stats, settings, onNavigate, onSettings }: HomePagePr
             <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-[#FFE082] inline-block" /> Wrong spot</span>
             <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-[#ECEFF1] inline-block" /> Absent</span>
           </div>
+        </div>
+
+        {/* Friend Challenge */}
+        <div className="w-full marsh-card p-3.5 mb-3 text-center">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <CrossedSwordsIcon size={16} className="text-[#FFD54F]" />
+            <span className="text-xs font-semibold text-[#718096] uppercase tracking-wider">Friend Challenge</span>
+          </div>
+          <p className="text-[11px] text-[#718096] mb-2.5">
+            {challengeDate
+              ? `Puzzle from ${new Date(challengeDate + 'T00:00:00').toLocaleDateString()}`
+              : 'Send a friend the same daily puzzle and compare solve times.'}
+          </p>
+          <button
+            onClick={() => {
+              if (settings.sound) playClick()
+              if (onChallengeShare) {
+                onChallengeShare()
+                // Show feedback briefly
+                const btn = document.getElementById('challenge-btn')
+                if (btn) btn.textContent = 'Copied!'
+                setTimeout(() => {
+                  const btn2 = document.getElementById('challenge-btn')
+                  if (btn2) btn2.textContent = challengeDate ? 'Copy Challenge Link' : 'Copy Challenge Link'
+                }, 2000)
+              }
+            }}
+            id="challenge-btn"
+            className="marsh-btn marsh-btn-primary w-full py-2.5 text-xs"
+          >
+            <span className="flex items-center justify-center gap-1.5">
+              <ClipboardIcon size={14} className="text-white" />
+              {challengeDate ? 'Copy Challenge Link' : 'Copy Challenge Link'}
+            </span>
+          </button>
         </div>
 
         {/* Star divider */}

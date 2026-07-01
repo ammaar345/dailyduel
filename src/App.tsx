@@ -3,27 +3,40 @@ import { DuelPage } from './pages/DuelPage'
 import { PracticePage } from './pages/PracticePage'
 import { HomePage } from './pages/HomePage'
 import { SettingsDialog } from './components/ui/SettingsDialog'
-import { getDailyPuzzle } from './lib/daily'
+import { getDailyPuzzle, getPuzzleForDate } from './lib/daily'
 import { loadStats, saveStats, type Stats } from './lib/stats'
 import { loadSettings, type Settings } from './lib/settings'
 
 type Page = 'home' | 'practice' | 'duel' | 'stats' | 'settings'
+
+function parseChallengeUrl(): { date: string | null } {
+  const params = new URLSearchParams(window.location.search)
+  const date = params.get('challenge')
+  return { date }
+}
 
 export default function App() {
   const [page, setPage] = useState<Page>('home')
   const [stats, setStats] = useState<Stats>(() => loadStats())
   const [settings, setSettings] = useState<Settings>(() => loadSettings())
   const [showSettings, setShowSettings] = useState(false)
-  const [puzzle] = useState(() => getDailyPuzzle())
+
+  // Parse challenge from URL
+  const { date: challengeDate } = parseChallengeUrl()
+  const [puzzle] = useState(() => {
+    if (challengeDate) {
+      const d = new Date(challengeDate + 'T00:00:00')
+      return getPuzzleForDate ? getPuzzleForDate(d) : getDailyPuzzle()
+    }
+    return getDailyPuzzle()
+  })
 
   useEffect(() => {
     saveStats(stats)
   }, [stats])
 
   useEffect(() => {
-    // Remove all contrast classes first
     document.documentElement.classList.remove('high', 'soft', 'dark')
-    // Add the current contrast class
     if (settings.contrast !== 'medium') {
       document.documentElement.classList.add(settings.contrast)
     }
@@ -41,7 +54,6 @@ export default function App() {
         totalPlayTime: s.totalPlayTime + timeMs,
         lastPlayed: Date.now(),
       }
-      // Save day result for streak calendar
       const key = `dailyduel-day-${new Date().toISOString().slice(0, 10)}`
       localStorage.setItem(key, 'won')
       return updated
@@ -68,8 +80,14 @@ export default function App() {
     localStorage.setItem('dailyduel-settings', JSON.stringify(newSettings))
   }
 
-  // Render settings as overlay instead of replacing the game page
-  // This prevents game state from being lost on theme/sound changes
+  // Challenge share handler
+  const handleChallengeShare = () => {
+    const today = new Date().toISOString().slice(0, 10)
+    const url = `${window.location.origin}${window.location.pathname}?challenge=${today}`
+    navigator.clipboard.writeText(url).catch(() => {})
+    return url
+  }
+
   const renderPage = () => {
     switch (page) {
       case 'practice':
@@ -101,6 +119,8 @@ export default function App() {
             settings={settings}
             onNavigate={setPage}
             onSettings={() => setShowSettings(true)}
+            challengeDate={challengeDate}
+            onChallengeShare={handleChallengeShare}
           />
         )
     }

@@ -1,5 +1,7 @@
 # DailyDuel — Head-to-Head Daily Word Battles
 
+**GitHub**: https://github.com/ammaar345/dailyduel
+
 ## Project Overview
 DailyDuel is a competitive daily word puzzle game where two players race to solve the same puzzle. Built on React 19 + TypeScript + Tailwind v4 + Vite, leveraging the proven daily game model with a unique PvP twist that drives viral sharing.
 

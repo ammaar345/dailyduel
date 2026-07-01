@@ -9,6 +9,7 @@ import type { Settings } from '../lib/settings'
 import { playKeyClick, playBackspace, playCorrect, playPresent, playAbsent, playWin, playLose, playClick } from '../lib/sounds'
 import { BackIcon, GearIcon } from '../components/ui/Icons'
 import { ColorKey } from '../components/game/ColorKey'
+import { GameTimer } from '../components/game/GameTimer'
 import { AdBanner } from '../components/ui/AdBanner'
 
 interface PracticePageProps {
@@ -126,6 +127,9 @@ export function PracticePage({ puzzle, settings, stats, onWin, onLoss, onBack, o
           {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
         </span>
       </div>
+
+      {/* Live timer */}
+      <GameTimer startTime={game.startTime} running={game.gameStatus === 'playing'} className="mb-3" />
 
       {/* Ad Banner - Shown during practice games */}
       <AdBanner />

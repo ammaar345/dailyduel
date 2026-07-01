@@ -15,6 +15,13 @@ export function getDailyPuzzle(): Puzzle {
   return { word, date: dateStr, seed }
 }
 
+export function getPuzzleForDate(date: Date): Puzzle {
+  const dateStr = date.toISOString().split('T')[0]
+  const word = getWordForDate(date)
+  const seed = date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate()
+  return { word, date: dateStr, seed }
+}
+
 export function checkGuess(guess: string, target: string): ('correct' | 'present' | 'absent')[] {
   const result: ('correct' | 'present' | 'absent')[] = Array(5).fill('absent')
   const targetChars = target.split('')

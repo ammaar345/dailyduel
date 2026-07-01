@@ -10,6 +10,7 @@ import type { Settings } from '../lib/settings'
 import { playKeyClick, playBackspace, playCorrect, playWin, playLose, playClick } from '../lib/sounds'
 import { BackIcon } from '../components/ui/Icons'
 import { ColorKey } from '../components/game/ColorKey'
+import { GameTimer } from '../components/game/GameTimer'
 import { AdBanner } from '../components/ui/AdBanner'
 
 interface DuelPageProps {
@@ -174,42 +175,45 @@ export function DuelPage({ puzzle, settings, stats, onBack }: DuelPageProps) {
 
       {/* Duel boards */}
       {started && (
-        <div className="w-full grid grid-cols-2 gap-4 mt-2">
-          <DuelBoard
-            playerName="YOU"
-            guesses={player.guesses}
-            currentGuess={player.currentGuess}
-            isCurrentPlayer={true}
-            solved={player.gameStatus === 'won'}
-          />
-          <DuelBoard
-            playerName="RIVAL BOT"
-            guesses={botSolver.guesses}
-            currentGuess=""
-            isCurrentPlayer={false}
-            solved={botSolver.solved}
-          />
-        </div>
-      )}
+        <>
+          {/* Live timer */}
+          <div className="w-full flex justify-center mb-2">
+            <GameTimer startTime={player.startTime} running={player.gameStatus === 'playing'} />
+          </div>
 
-      {/* Ad Banner - Shown during duels */}
-      <AdBanner />
+          <div className="w-full grid grid-cols-2 gap-4 mt-1">
+            <DuelBoard
+              playerName="YOU"
+              guesses={player.guesses}
+              currentGuess={player.currentGuess}
+              isCurrentPlayer={true}
+              solved={player.gameStatus === 'won'}
+            />
+            <DuelBoard
+              playerName="RIVAL BOT"
+              guesses={botSolver.guesses}
+              currentGuess=""
+              isCurrentPlayer={false}
+              solved={botSolver.solved}
+            />
+          </div>
 
-      {/* Color Key Legend */}
-      {started && (
-        <div className="w-full mt-3 mb-1">
-          <ColorKey />
-        </div>
-      )}
+          {/* Ad Banner - Shown during duels */}
+          <AdBanner />
 
-      {/* Keyboard */}
-      {started && (
-        <div className="mt-2">
-          <GameKeyboard
-            onKey={handleKey}
-            keyStates={getKeyStates(player.guesses)}
-          />
-        </div>
+          {/* Color Key Legend */}
+          <div className="w-full mt-3 mb-1">
+            <ColorKey />
+          </div>
+
+          {/* Keyboard */}
+          <div className="mt-2">
+            <GameKeyboard
+              onKey={handleKey}
+              keyStates={getKeyStates(player.guesses)}
+            />
+          </div>
+        </>
       )}
 
       {/* Result overlay */}
