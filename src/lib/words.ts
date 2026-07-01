@@ -1,8 +1,10 @@
-const WORDS: string[] = [
-  // 5-letter words organized by category
+import { isInDictionary } from './dictionary'
+
+// Curated answer pool for daily puzzles (fun, common 5-letter words)
+const ANSWERS: string[] = [
   // Animals
   'EAGLE', 'TIGER', 'WHALE', 'PANDA', 'HORSE',
-  'LEMON', 'TIGER', 'RIVER', 'CLOUD', 'STORM',
+  'LEMON', 'RIVER', 'CLOUD', 'STORM',
   // Nature
   'PLANT', 'OCEAN', 'FLAME', 'FROST', 'BLAZE',
   'STONE', 'BREEZE', 'CANYON', 'VALLEY', 'MEADOW',
@@ -11,13 +13,13 @@ const WORDS: string[] = [
   'FORCE', 'VIRUS', 'STACK', 'FRAME', 'MOUSE',
   // Food
   'PIZZA', 'TACOS', 'NOODLE', 'GRAPE', 'MANGO',
-  'BREAD', 'CHEESE', 'OLIVE', 'BANANA', 'CHERRY',
+  'BREAD', 'CHEESE', 'OLIVE', 'CHERRY',
   // Actions
   'DANCE', 'FLYER', 'SLEEP', 'WRITE', 'READS',
   'LEARN', 'BUILD', 'SWING', 'CLIMB', 'SHOUT',
   // Colors
   'CORAL', 'IVORY', 'AMBER', 'AZURE', 'MAUVE',
-  'JADE', 'ROSE', 'LILAC', 'TAN', 'TURQUOISE',
+  'JADE', 'ROSE', 'LILAC',
   // Abstract
   'DREAM', 'BRISK', 'SOLAR', 'LUNAR', 'PRIME',
   'NOBLE', 'VIGOR', 'GRACE', 'HAVEN', 'ZEST',
@@ -25,9 +27,6 @@ const WORDS: string[] = [
   'CLOCK', 'CHAIR', 'BRUSH', 'PLATE', 'BRICK',
   'FLUTE', 'RULER', 'TOWER', 'SWORD', 'CROWN',
 ]
-
-// Deduplicate
-const UNIQUE_WORDS = [...new Set(WORDS)]
 
 // Hash-based seeded random
 function seededRandom(seed: number): () => number {
@@ -41,15 +40,14 @@ function seededRandom(seed: number): () => number {
 export function getWordForDate(date: Date): string {
   const seed = date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate()
   const rng = seededRandom(seed)
-  const idx = Math.floor(rng() * UNIQUE_WORDS.length)
-  return UNIQUE_WORDS[idx]
+  const idx = Math.floor(rng() * ANSWERS.length)
+  return ANSWERS[idx]
 }
 
-export function getAllWords(): readonly string[] {
-  return UNIQUE_WORDS
+export function getAllAnswers(): readonly string[] {
+  return ANSWERS
 }
 
 export function isValidWord(word: string): boolean {
-  // Check if word is 5 letters and exists in our curated list
-  return word.length === 5 && UNIQUE_WORDS.includes(word.toUpperCase())
+  return word.length === 5 && isInDictionary(word)
 }

@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { DuelBoard } from '../components/game/DuelBoard'
 import { GameKeyboard } from '../components/game/GameKeyboard'
 import { ResultScreen } from '../components/game/ResultScreen'
 import { createGameState, handleKeyPress, getKeyStates } from '../lib/gameLogic'
+import { createBotSolver, botMakeGuess } from '../lib/botSolver'
 import type { Puzzle } from '../lib/daily'
 import type { Stats } from '../lib/stats'
 import type { Settings } from '../lib/settings'
@@ -19,71 +20,58 @@ interface DuelPageProps {
   onSettings: () => void
 }
 
-// Simulated opponent for MVP (single-player duel vs bot)
-function createBotState() {
-  return {
-    name: 'RIVAL BOT',
-    startTime: Date.now(),
-    solved: false,
-    guesses: [] as { word: string; result: ('correct' | 'present' | 'absent')[] }[],
-    currentGuess: '',
-    solveTimeMs: 8000 + Math.random() * 12000, // 8-20 seconds
-    intervalId: null as ReturnType<typeof setInterval> | null,
-  }
-}
+// Bot difficulty config — decent pace, not too fast/slow
+const BOT_GUESS_INTERVAL_MS = 3500  // time between bot guesses
 
 export function DuelPage({ puzzle, settings, stats, onBack }: DuelPageProps) {
   const [player, setPlayer] = useState(createGameState)
-  const [bot, setBot] = useState(createBotState)
+  const [botSolver, setBotSolver] = useState(createBotSolver)
   const [countdown, setCountdown] = useState(3)
   const [started, setStarted] = useState(false)
   const [playerWon, setPlayerWon] = useState<boolean | null>(null)
+  const [invalidMsg, setInvalidMsg] = useState(false)
+  const [botSolveTimeMs] = useState(() => 12000 + Math.random() * 13000) // 12-25s
+  const botStartTimeRef = useRef<number>(0)
+
+  const showInvalid = useCallback(() => {
+    setInvalidMsg(true)
+    setTimeout(() => setInvalidMsg(false), 1200)
+  }, [])
 
   // Countdown
   useEffect(() => {
     if (countdown <= 0) {
       setStarted(true)
+      botStartTimeRef.current = Date.now()
       return
     }
     const timer = setTimeout(() => setCountdown(c => c - 1), 800)
     return () => clearTimeout(timer)
   }, [countdown])
 
-  // Bot AI (simplified: guesses random words until solved)
+  // Smart Bot AI — makes real Wordle guesses at a pace
   useEffect(() => {
-    if (!started || player.gameStatus !== 'playing') return
+    if (!started || player.gameStatus !== 'playing' || botSolver.solved) return
 
     const id = setInterval(() => {
-      setBot(prev => {
+      setBotSolver(prev => {
         if (prev.solved || player.gameStatus !== 'playing') return prev
 
-        // Simple bot: make random 5-letter guesses
-        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-        const guess = Array.from({ length: 5 }, () => letters[Math.floor(Math.random() * 26)]).join('')
+        // Bot makes a real guess using solver logic
+        const next = botMakeGuess(prev, puzzle.word)
 
-        // Check if solved (bot gets lucky eventually)
-        const timeSinceStart = Date.now() - prev.startTime
-        if (timeSinceStart > prev.solveTimeMs) {
-          return { ...prev, solved: true }
+        // Check if bot solved
+        if (next.solved) {
+          // Bot solved — player loses unless they already won
+          setPlayerWon(w => w === true ? true : false)
         }
 
-        // Add guess with random results (biased toward absent)
-        const results: ('correct' | 'present' | 'absent')[] = Array.from({ length: 5 }, () => {
-          const r = Math.random()
-          if (r < 0.15) return 'correct'
-          if (r < 0.25) return 'present'
-          return 'absent'
-        })
-
-        return {
-          ...prev,
-          guesses: [...prev.guesses, { word: guess, result: results }],
-        }
+        return next
       })
-    }, 1500 + Math.random() * 2000)
+    }, BOT_GUESS_INTERVAL_MS)
 
     return () => clearInterval(id)
-  }, [started, player.gameStatus])
+  }, [started, player.gameStatus, botSolver.solved, puzzle.word])
 
   // Player keyboard
   const handleKey = useCallback((key: string) => {
@@ -97,28 +85,28 @@ export function DuelPage({ puzzle, settings, stats, onBack }: DuelPageProps) {
       if (result.eventType === 'win') {
         if (settings.sound) playWin()
         setPlayerWon(true)
-        setBot(b => ({ ...b, solved: true }))
       }
       if (result.eventType === 'lose') {
         if (settings.sound) playLose()
         setPlayerWon(false)
       }
+      if (result.eventType === 'invalid') {
+        showInvalid()
+      }
       return result.state
     })
-  }, [started, player.gameStatus, puzzle.word, settings.sound])
+  }, [started, player.gameStatus, puzzle.word, settings.sound, showInvalid])
 
   // Physical keyboard with animations
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (!started || player.gameStatus !== 'playing') return
 
-      // Add visual feedback for physical key presses
       const key = e.key === 'Enter' ? 'ENTER' : e.key === 'Backspace' ? '⌫' : e.key.toUpperCase()
-      const button = document.querySelector(`button[onclick*="${key}"]`)
+      const button = document.querySelector(`button[data-key="${key}"]`)
       button?.classList.add('pressed')
       setTimeout(() => button?.classList.remove('pressed'), 200)
 
-      // Handle the key
       if (e.key === 'Enter') handleKey('ENTER')
       else if (e.key === 'Backspace') handleKey('⌫')
       else if (/^[a-zA-Z]$/.test(e.key)) handleKey(e.key.toUpperCase())
@@ -135,8 +123,17 @@ export function DuelPage({ puzzle, settings, stats, onBack }: DuelPageProps) {
     navigator.clipboard.writeText(text).catch(() => {})
   }
 
-  // Both done
-  const bothDone = (player.gameStatus !== 'playing' && bot.solved) || playerWon !== null
+  // Both done check
+  const bothDone = playerWon !== null
+
+  const handleRestart = () => {
+    if (settings.sound) playClick()
+    setPlayer(createGameState())
+    setBotSolver(createBotSolver())
+    setCountdown(3)
+    setStarted(false)
+    setPlayerWon(null)
+  }
 
   return (
     <div className="min-h-dvh flex flex-col items-center px-4 py-4 max-w-2xl mx-auto">
@@ -164,6 +161,17 @@ export function DuelPage({ puzzle, settings, stats, onBack }: DuelPageProps) {
         </div>
       )}
 
+      {/* Invalid word toast */}
+      {started && (
+        <div className={`relative w-full h-0 ${invalidMsg ? 'z-50' : ''}`}>
+          <div className={`absolute left-1/2 -translate-x-1/2 top-0 transition-all duration-200 ${invalidMsg ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}`}>
+            <div className="bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-lg">
+              Not in word list
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Duel boards */}
       {started && (
         <div className="w-full grid grid-cols-2 gap-4 mt-2">
@@ -175,11 +183,11 @@ export function DuelPage({ puzzle, settings, stats, onBack }: DuelPageProps) {
             solved={player.gameStatus === 'won'}
           />
           <DuelBoard
-            playerName={bot.name}
-            guesses={bot.guesses}
+            playerName="RIVAL BOT"
+            guesses={botSolver.guesses}
             currentGuess=""
             isCurrentPlayer={false}
-            solved={bot.solved}
+            solved={botSolver.solved}
           />
         </div>
       )}
@@ -208,19 +216,12 @@ export function DuelPage({ puzzle, settings, stats, onBack }: DuelPageProps) {
       {bothDone && (
         <ResultScreen
           won={playerWon === true}
-          timeMs={player.gameStatus === 'won' ? Date.now() - player.startTime : bot.solveTimeMs}
+          timeMs={player.gameStatus === 'won' ? player.elapsedMs : botSolveTimeMs}
           guesses={player.guesses.length}
-          opponentName={bot.name}
-          opponentTime={bot.solveTimeMs}
+          opponentName="RIVAL BOT"
+          opponentTime={botSolveTimeMs}
           stats={stats}
-          onPlayAgain={() => {
-            if (settings.sound) playClick()
-            setPlayer(createGameState())
-            setBot(createBotState())
-            setCountdown(3)
-            setStarted(false)
-            setPlayerWon(null)
-          }}
+          onPlayAgain={handleRestart}
           onHome={() => {
             if (settings.sound) playClick()
             onBack()

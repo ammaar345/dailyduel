@@ -1,4 +1,4 @@
-import { getWordForDate } from './words'
+import { getWordForDate, isValidWord as realIsValidWord } from './words'
 
 export interface Puzzle {
   word: string
@@ -43,8 +43,7 @@ export function checkGuess(guess: string, target: string): ('correct' | 'present
 }
 
 export function isValidWord(word: string): boolean {
-  // For MVP, accept any 5-letter combination
-  return word.length === 5
+  return realIsValidWord(word)
 }
 
 export function formatTime(ms: number): string {

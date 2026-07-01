@@ -6,6 +6,7 @@ DailyDuel is a competitive daily word puzzle game where two players race to solv
 **Repo**: https://github.com/ammaar345/dailyduel
 **Branch**: `feature/initial-setup`
 **Dev**: `npm run dev` (localhost:3000)
+**Session start**: always start `npm run dev` and tell sneaky the port so they can test locally before deploy.
 
 ---
 
@@ -14,17 +15,20 @@ DailyDuel is a competitive daily word puzzle game where two players race to solv
 ### Homepage
 - Animated crown hero (cloud-like float animation, darker gold `#E8B830`)
 - Rank card with XP bar + level display (clickable → opens XP modal)
-- Stat cards: Wins (Trophy), Streak (Heart), Best (Fire) — each in tinted rounded-square icon container, hover-wiggle animation, JetBrains Mono numbers
-- Practice Mode button (lighter blue gradient `#BBDEFB → #64B5F6`, TargetIcon)
-- Start Duel button (white secondary, CrossedSwordsIcon)
+- Stat cards: Wins (Trophy), Streak (Heart), Best (Fire) — wider, bigger padding, hover-wiggle animation, JetBrains Mono numbers
+- Weekly streak calendar strip (7-day view, W/L/new indicators)
+- Quick stats row (Today status, Win Rate, Max Streak)
+- Practice Mode button (full width, lighter blue gradient)
+- Start Duel button (full width, white secondary)
 - Animated settings button (gear rotates 90° on hover, pill background)
+- Marshmallow cloud background blobs (floating, blurred pastel circles)
 - XP Detail Modal: shows level, XP bar, total XP, games played, wins, max streak
 
 ### Design System
 - Palette: cream `#F8F6F2`, baby blue `#90CAF9 / #64B5F6`, mint `#80CBC4`, lavender `#B39DDB`, amber `#FFD54F`
 - Fonts: Fredoka (headings/labels), JetBrains Mono (stat numbers, XP display)
 - Icons: 15 custom bubbly SVG components (CrownIcon, TrophyIcon, HeartIcon, FireIcon, SwordIcon, TargetIcon, CrossedSwordsIcon, StarIcon, GearIcon, BackIcon, CloseIcon, ClipboardIcon, SkullIcon, PlayIcon, XIcon)
-- Animations: float-cloud (gentle drift), icon-wiggle, group-hover-scale, heart-beat, shadow-pulse
+- Animations: float-cloud (gentle drift), cloud-drift (background blobs), icon-wiggle, group-hover-scale, heart-beat, shadow-pulse
 - CSS utility classes: `.marsh-card`, `.marsh-btn`, `.marsh-btn-primary`, `.marsh-btn-secondary`, `.kb-key`, `.tile-dither`, `.font-mono-nums`
 
 ### Practice Mode
@@ -40,7 +44,8 @@ DailyDuel is a competitive daily word puzzle game where two players race to solv
 ### Duel Mode
 - 3-2-1 countdown before race
 - Side-by-side boards: YOU vs RIVAL BOT
-- Bot opponent with randomized solve time (8-20s)
+- Smart bot with real Wordle strategy (common-letter elimination, real tile feedback)
+- Bot guesses every ~3.5s, takes 3-5 guesses to solve on average
 - Real-time board updates as both play
 - Crown animation on solved board
 - Win/loss result screen with opponent comparison + share
@@ -81,8 +86,10 @@ src/
 │       ├── SettingsDialog.tsx   # Sound/theme/animation settings
 │       └── XpModal.tsx          # XP detail modal (level, XP bar, stats)
 ├── lib/
-│   ├── words.ts                 # 80+ curated 5-letter words, date-seeded
+│   ├── words.ts                 # Curated answer list (73 words), date-seeded puzzle
 │   ├── daily.ts                 # Puzzle generation, guess checking, validation
+│   ├── botSolver.ts              # Smart bot AI: letter-freq elimination, real feedback
+│   ├── dictionary.ts            # 5,766 valid 5-letter words for guess validation
 │   ├── gameLogic.ts             # Game state machine, key handling, win/loss
 │   ├── stats.ts                 # Stats load/save, XP, rank calculation
 │   ├── settings.ts              # Settings load/save with defaults
@@ -98,23 +105,27 @@ src/
 - Tile dither via CSS SVG background pattern
 - CSS animations: pop-in, shake, slide-up, pulse-glow, crown-bounce, fire-flicker
 - Date-seeded puzzle (same word for everyone on same day)
-- Word list: 80+ 5-letter words across categories (animals, nature, tech, food, actions, colors, abstract, objects)
+- Word list: 5,766 real 5-letter words for validation (Stanford GraphBase + curated additions)
 - No external audio files — all sounds generated via Web Audio API oscillators
 
 ### What Works Now
-- Practice mode: fully playable Wordle clone with sounds + stats
-- Duel mode: race a bot on the same daily puzzle, side-by-side boards
+- Practice mode: fully playable Wordle clone with sounds + stats (solo, no opponent)
+- Duel mode: race a smart bot on the same daily puzzle, side-by-side boards
+- Smart bot AI: real Wordle strategy (CRANE/SLATE opener, letter-freq elimination, real tile feedback)
+- Settings overlay: theme/sound changes don't reset game board (settings renders on top, not replacing)
+- Night-light-safe keyboard colors: higher saturation green/yellow borders survive orange tint
 - Progression: XP, levels, ranks, streaks all persist in LocalStorage
 - Settings: sound, theme, animations all functional
 - Share: copies emoji grid to clipboard on win/loss
 - TypeScript: zero compilation errors, clean build
-- Dictionary: curated word list with 80+ words across categories
-- Bot AI: randomized bot behavior in practice mode (random guesses every 2-5s, solves after 10-25s)
+- Dictionary: 5,766 real 5-letter words (Stanford GraphBase + curated)
+- Homepage: streak calendar, quick stats, marshmallow cloud background, full-width buttons
 - Contrasting theme colors: 4 modes (medium, high, soft, dark) with distinct color schemes
-- Real word validation: only accepts words from curated list
+- Real word validation: rejects invalid guesses with shake + "Not in word list" toast
 - Keyboard animations: both on-screen and physical keyboard buttons animate on press
 - Theme-specific keyboard colors: keyboard changes colors based on active theme
 - Dark mode navy blue theme: dark blue background with appropriate tile colors
+- Daily result tracking: win/loss saved per day for streak calendar display
 
 ### What's NOT Built Yet
 - Real-time PvP (WebRTC) — bot is placeholder
@@ -126,12 +137,14 @@ src/
 - Push notifications
 - Tournament mode
 - Mobile responsive (works but not optimized)
-- GitHub Pages deployment
+- Live timer display during gameplay
 
 ### Future Updates (Priority Queue)
 - **Timer sound**: play a tick sound on each second during practice/duel timer
 - **Real matchmaking**: replace bot with real human opponents (WebRTC + signaling server)
 - **Color key legend**: visible guide showing what green/yellow/gray mean (right place, wrong place/right letter, absent) — decent size so it's noticeable on-screen
+- **Live game timer**: elapsedMs tracked but never shown during play. Add visible count-up timer above board for tension, esp. in duel mode
+- **Friend challenge via URL params**: before full WebRTC, shareable link seeds same puzzle for both players via URL params + localStorage. Compare solve times — no real-time needed, same viral loop
 
 ---
 
@@ -576,12 +589,23 @@ DailyDuel combines the proven daily game model with competitive gameplay to crea
 
 ## What To Do Next (Prioritized)
 
-### 1. Dictionary Validation
-- Add real 5-letter word list (TWL or SOWPODS, ~12K words)
-- Reject invalid guesses with shake + "not a word" toast
-- Keep answer list curated (80+ fun/common words)
+### 1. Live Game Timer
+- Add visible count-up timer during gameplay (elapsedMs tracked, not displayed)
+- Position above board in practice + duel mode
+- Adds tension, esp. seeing your time vs bot progress in duel
 
-### 2. Real WebRTC PvP
+### 2. Smart Bot (Real Wordle Strategy)
+- Current bot guesses random letters with fake results — obviously fake
+- Replace with real dictionary words, common-letter-first strategy
+- Real tile feedback matching actual daily puzzle
+- Makes duel mode compelling before WebRTC
+
+### 3. Friend Challenge (URL Params)
+- Shareable link seeds same puzzle for both players via URL params + localStorage
+- No real-time needed: "I solved at 14:32, you solve and compare"
+- Same viral loop as WebRTC, fraction of complexity
+
+### 4. Real WebRTC PvP
 - Replace bot with real human opponent
 - Room creation via shareable link (`dailyduel.app/room/ABC123`)
 - Signaling through Firebase Realtime Database (free tier)
@@ -665,16 +689,62 @@ DailyDuel combines the proven daily game model with competitive gameplay to crea
 - Enhanced Web Audio API sounds for better user experience
 - Improved theme switching performance
 
+**Carbon Ads Integration**
+- Fixed AdBanner.tsx: uses useRef instead of getElementById, skips rendering if no Placement ID
+- Created InterstitialAd.tsx: 5-second countdown interstitial shown after every game result
+- Both components are wired up and gracefully render nothing until Placement ID is added
+- Files to update with Placement ID: `src/components/ui/AdBanner.tsx` and `src/components/ui/InterstitialAd.tsx`
+
 **Documentation**
 - Updated CLAUDE.md with all current features and fixes
 - Removed outdated "Dictionary validation" from TODO (now implemented)
 - Added completed features to "What Works Now" section
 
+### ✅ Completed Features (June 25, 2026)
+
+**Dictionary Validation**
+- Added real 5,766-word dictionary (Stanford GraphBase + 9 curated additions)
+- Created `src/lib/dictionary.ts` with Set-based lookup
+- Fixed curated answer list: removed `TAN` (3 letters), `BANANA` (6), `TURQUOISE` (9)
+- "Not in word list" red toast on invalid guess + shake animation
+- Both practice and duel modes use real dictionary validation
+
+**Smart Bot AI** (June 26, 2026)
+- Created `src/lib/botSolver.ts` — real Wordle strategy engine
+- Bot opens with common-letter-maximizing words (CRANE, SLATE, SAUCE, RAISE, etc.)
+- Filters remaining answer candidates based on real tile feedback
+- Scores words by letter frequency + candidate overlap for optimal elimination
+- Always guesses real dictionary words with actual checkGuess results
+- Bot guesses every ~3.5s, typically solves in 3-5 guesses
+- Replaced random letter gibberish with compelling opponent
+
+**Theme Change No Longer Resets Game Board** (June 26, 2026)
+- Root cause: SettingsDialog replaced entire page when open, unmounting game components
+- Fix: SettingsDialog now renders as overlay on top of game page (not replacing it)
+- PracticePage uses useRef for sound callbacks to avoid stale closures on setting changes
+- Game state survives theme/sound/volume changes mid-game in both practice and duel
+
+**Night-Light-Safe Keyboard Colors** (June 26, 2026)
+- Bumped saturation/brightness on correct/present keyboard key colors
+- Default theme: `--tile-correct-border: #43A047` (was #81C784), `--tile-present-border: #FFB300` (was #FFD54F)
+- Soft theme: same bumps applied for consistency
+- Dark theme: `--tile-correct-border: #03A9F4`, `--tile-present-border: #FF9100` (more vivid)
+- Colors survive orange night light tint on mobile/PC
+
+**Homepage Layout + Marshmallow Cloud Feel** (June 26, 2026)
+- Stat cards wider with more padding
+- Full-width action buttons (Practice Mode + Start Duel)
+- Weekly streak calendar strip (7-day W/L view with color indicators)
+- Quick stats row (Today, Win Rate, Max Streak)
+- Marshmallow cloud background: floating, blurred pastel circles (blue, lavender, mint, amber)
+- Added `cloud-drift` animation for background blobs
+- Daily result saved to localStorage on win/loss (`dailyduel-day-YYYY-MM-DD`)
+
 ### 🔧 Current Status
 - Core gameplay features are fully functional
-- All contrast modes work properly with distinct visual styles
-- Practice mode includes bot opponent for solo play
-- Word validation ensures only valid words can be entered
-- Keyboard animations work for both on-screen and physical keyboard
-- All themes have proper cream background colors
-- Ready for real WebRTC implementation for human vs human duels
+- Smart bot with real Wordle strategy makes duel mode compelling
+- Theme changes no longer reset game board
+- Keyboard colors visible under night light
+- Homepage filled out with functional content (not decorative)
+- Practice mode is solo (no opponent), Duel mode vs smart bot (2 options total)
+- Next priorities: live timer, friend challenge link, GitHub Pages deploy

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { GameBoard } from '../components/game/GameBoard'
 import { GameKeyboard } from '../components/game/GameKeyboard'
 import { ResultScreen } from '../components/game/ResultScreen'
@@ -24,45 +24,57 @@ interface PracticePageProps {
 export function PracticePage({ puzzle, settings, stats, onWin, onLoss, onBack, onSettings }: PracticePageProps) {
   const [game, setGame] = useState(createGameState)
   const [shakeRow, setShakeRow] = useState<number | null>(null)
+  const [invalidMsg, setInvalidMsg] = useState(false)
+  // Keep a stable ref to settings.sound so callbacks don't go stale on theme change
+  const soundRef = useRef(settings.sound)
+  soundRef.current = settings.sound
 
-  
+  const showInvalid = useCallback(() => {
+    setInvalidMsg(true)
+    setTimeout(() => setInvalidMsg(false), 1200)
+  }, [])
+
   const handleKey = useCallback((key: string) => {
     setGame(prev => {
       if (prev.gameStatus !== 'playing') return prev
       const result = handleKeyPress(key, prev, puzzle.word)
-      if (result.eventType === 'key' && settings.sound) playKeyClick()
-      if (result.eventType === 'backspace' && settings.sound) playBackspace()
-      if (result.eventType === 'correct' && settings.sound) playCorrect()
-      if (result.eventType === 'present' && settings.sound) playPresent()
-      if (result.eventType === 'absent' && settings.sound) playAbsent()
-      if (result.eventType === 'win' && settings.sound) playWin()
-      if (result.eventType === 'lose' && settings.sound) playLose()
+      if (result.eventType === 'key' && soundRef.current) playKeyClick()
+      if (result.eventType === 'backspace' && soundRef.current) playBackspace()
+      if (result.eventType === 'correct' && soundRef.current) playCorrect()
+      if (result.eventType === 'present' && soundRef.current) playPresent()
+      if (result.eventType === 'absent' && soundRef.current) playAbsent()
+      if (result.eventType === 'win' && soundRef.current) playWin()
+      if (result.eventType === 'lose' && soundRef.current) playLose()
       if (result.eventType === 'invalid') {
         setShakeRow(result.state.guesses.length)
         setTimeout(() => setShakeRow(null), 400)
+        showInvalid()
       }
       return result.state
     })
-  }, [puzzle.word, settings.sound])
+  }, [puzzle.word, showInvalid])
 
-  // Win/loss callbacks
+  // Win/loss callbacks — use refs to avoid stale closure on theme change
+  const onWinRef = useRef(onWin)
+  onWinRef.current = onWin
+  const onLossRef = useRef(onLoss)
+  onLossRef.current = onLoss
+
   useEffect(() => {
-    if (game.gameStatus === 'won') onWin(game.elapsedMs)
-    if (game.gameStatus === 'lost') onLoss()
-  }, [game.gameStatus, game.elapsedMs, onWin, onLoss])
+    if (game.gameStatus === 'won') onWinRef.current(game.elapsedMs)
+    if (game.gameStatus === 'lost') onLossRef.current()
+  }, [game.gameStatus, game.elapsedMs])
 
   // Physical keyboard with animations
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (game.gameStatus !== 'playing') return
 
-      // Add visual feedback for physical key presses
       const key = e.key === 'Enter' ? 'ENTER' : e.key === 'Backspace' ? '⌫' : e.key.toUpperCase()
-      const button = document.querySelector(`button[onclick*="${key}"]`)
+      const button = document.querySelector(`button[data-key="${key}"]`)
       button?.classList.add('pressed')
       setTimeout(() => button?.classList.remove('pressed'), 200)
 
-      // Handle the key
       if (e.key === 'Enter') handleKey('ENTER')
       else if (e.key === 'Backspace') handleKey('⌫')
       else if (/^[a-zA-Z]$/.test(e.key)) handleKey(e.key.toUpperCase())
@@ -79,7 +91,7 @@ export function PracticePage({ puzzle, settings, stats, onWin, onLoss, onBack, o
   }
 
   const handleRestart = () => {
-    if (settings.sound) playClick()
+    if (soundRef.current) playClick()
     setGame(createGameState())
   }
 
@@ -89,7 +101,7 @@ export function PracticePage({ puzzle, settings, stats, onWin, onLoss, onBack, o
       <div className="flex items-center justify-between w-full mb-4">
         <button
           onClick={() => {
-            if (settings.sound) playClick()
+            if (soundRef.current) playClick()
             onBack()
           }}
           className="w-10 h-10 flex items-center justify-center text-[#A0AEC0] hover:text-[#90CAF9] transition-colors cursor-pointer"
@@ -99,7 +111,7 @@ export function PracticePage({ puzzle, settings, stats, onWin, onLoss, onBack, o
         <h1 className="text-lg font-bold tracking-tight text-[#4A5568] uppercase">Practice</h1>
         <button
           onClick={() => {
-            if (settings.sound) playClick()
+            if (soundRef.current) playClick()
             onSettings()
           }}
           className="w-10 h-10 flex items-center justify-center text-[#A0AEC0] hover:text-[#90CAF9] transition-colors cursor-pointer"
@@ -117,6 +129,15 @@ export function PracticePage({ puzzle, settings, stats, onWin, onLoss, onBack, o
 
       {/* Ad Banner - Shown during practice games */}
       <AdBanner />
+
+      {/* Invalid word toast */}
+      <div className={`relative w-full h-0 ${invalidMsg ? 'z-50' : ''}`}>
+        <div className={`absolute left-1/2 -translate-x-1/2 top-0 transition-all duration-200 ${invalidMsg ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}`}>
+          <div className="bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-lg">
+            Not in word list
+          </div>
+        </div>
+      </div>
 
       {/* Board */}
       <div className="mb-4">
@@ -153,7 +174,7 @@ export function PracticePage({ puzzle, settings, stats, onWin, onLoss, onBack, o
           stats={stats}
           onPlayAgain={handleRestart}
           onHome={() => {
-            if (settings.sound) playClick()
+            if (soundRef.current) playClick()
             onBack()
           }}
           onShare={handleShare}
