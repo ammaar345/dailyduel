@@ -4,10 +4,11 @@ import { GameKeyboard } from '../components/game/GameKeyboard'
 import { ResultScreen } from '../components/game/ResultScreen'
 import { createGameState, handleKeyPress, getKeyStates } from '../lib/gameLogic'
 import type { Puzzle } from '../lib/daily'
-import type { Stats } from '../lib/stats'
+import { XP_WIN, XP_LOSS, type Stats } from '../lib/stats'
 import type { Settings } from '../lib/settings'
 import { playKeyClick, playBackspace, playCorrect, playPresent, playAbsent, playWin, playLose, playClick } from '../lib/sounds'
 import { BackIcon, GearIcon } from '../components/ui/Icons'
+import { SITE_HOST } from '../lib/site'
 import { ColorKey } from '../components/game/ColorKey'
 import { GameTimer } from '../components/game/GameTimer'
 import { AdBanner } from '../components/ui/AdBanner'
@@ -82,7 +83,7 @@ export function PracticePage({ puzzle, settings, stats, onWin, onLoss, onBack, o
   const handleShare = () => {
     const emojiMap = { correct: '🟩', present: '🟨', absent: '⬛' }
     const grid = game.guesses.map(g => g.result.map(r => emojiMap[r]).join('')).join('\n')
-    const text = `DailyDuel Practice\n${game.guesses.length}/6\n\n${grid}\n\ndailyduel.app`
+    const text = `DailyDuel Practice\n${game.guesses.length}/6\n\n${grid}\n\n${SITE_HOST}`
     navigator.clipboard.writeText(text).catch(() => {})
   }
 
@@ -170,7 +171,7 @@ export function PracticePage({ puzzle, settings, stats, onWin, onLoss, onBack, o
           won={game.gameStatus === 'won'}
           timeMs={game.elapsedMs}
           guesses={game.guesses.length}
-          xpEarned={game.gameStatus === 'won' ? 30 : 10}
+          xpEarned={game.gameStatus === 'won' ? XP_WIN : XP_LOSS}
           stats={stats}
           onPlayAgain={handleRestart}
           onHome={() => {

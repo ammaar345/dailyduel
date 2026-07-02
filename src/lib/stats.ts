@@ -39,6 +39,10 @@ export function saveStats(stats: Stats): void {
   localStorage.setItem('dailyduel-stats', JSON.stringify(stats))
 }
 
+// XP rewards per game outcome — single source of truth
+export const XP_WIN = 30
+export const XP_LOSS = 10
+
 export function addXP(amount: number): (s: Stats) => Stats {
   return (s) => {
     const newXP = s.xp + amount

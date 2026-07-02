@@ -781,4 +781,7 @@ DailyDuel combines the proven daily game model with competitive gameplay to crea
 - Practice mode is solo (no opponent), Duel mode vs smart bot (2 options total)
 - XP/rank progression works end-to-end; duels count toward stats
 - Mobile-friendly: no horizontal overflow at 375px in any mode
-- Next priorities: friend challenge polish, real matchmaking (WebRTC), Carbon placement ID
+- Release prep done (July 2, 2026): share text uses real domain via `src/lib/site.ts` (was dead `dailyduel.app`); og:image + twitter:image + apple-touch-icon (playwright-generated `public/og.png` 1200x630 + `public/apple-touch-icon.png` 180x180); `public/privacy.html` (needed for AdSense approval); AdBanner rewritten for **Google AdSense** (Carbon requires 10k monthly views — AdSense has no minimum); XP amounts centralized in stats.ts (XP_WIN/XP_LOSS); bot capped at 6 guesses (no infinite guessing)
+- To activate ads: AdSense approval, then fill ADSENSE_CLIENT + ADSENSE_SLOT in `src/components/ui/AdBanner.tsx`
+- Analytics: enable Cloudflare Web Analytics toggle in Pages dashboard (no code needed)
+- Next priorities: real-device mobile test, Reddit/ProductHunt launch, real matchmaking (WebRTC)

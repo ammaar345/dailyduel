@@ -4,14 +4,10 @@ import { PracticePage } from './pages/PracticePage'
 import { HomePage } from './pages/HomePage'
 import { SettingsDialog } from './components/ui/SettingsDialog'
 import { getDailyPuzzle, getPuzzleForDate } from './lib/daily'
-import { loadStats, saveStats, addXP, type Stats } from './lib/stats'
+import { loadStats, saveStats, addXP, XP_WIN, XP_LOSS, type Stats } from './lib/stats'
 import { loadSettings, type Settings } from './lib/settings'
 
 type Page = 'home' | 'practice' | 'duel' | 'stats' | 'settings'
-
-// XP rewards per game outcome
-const XP_WIN = 30
-const XP_LOSS = 10
 
 // Parse once — URL doesn't change during the session
 const challengeDate = new URLSearchParams(window.location.search).get('challenge')

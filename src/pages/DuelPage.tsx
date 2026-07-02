@@ -5,10 +5,11 @@ import { ResultScreen } from '../components/game/ResultScreen'
 import { createGameState, handleKeyPress, getKeyStates } from '../lib/gameLogic'
 import { createBotSolver, botMakeGuess } from '../lib/botSolver'
 import type { Puzzle } from '../lib/daily'
-import type { Stats } from '../lib/stats'
+import { XP_WIN, XP_LOSS, type Stats } from '../lib/stats'
 import type { Settings } from '../lib/settings'
 import { playKeyClick, playBackspace, playCorrect, playWin, playLose, playClick } from '../lib/sounds'
 import { BackIcon, GearIcon } from '../components/ui/Icons'
+import { SITE_HOST } from '../lib/site'
 import { ColorKey } from '../components/game/ColorKey'
 import { GameTimer } from '../components/game/GameTimer'
 import { AdBanner } from '../components/ui/AdBanner'
@@ -55,11 +56,12 @@ export function DuelPage({ puzzle, settings, stats, onWin, onLoss, onBack, onSet
 
   // Smart Bot AI — makes real Wordle guesses at a pace
   useEffect(() => {
-    if (!started || player.gameStatus !== 'playing' || botSolver.solved) return
+    // Bot is done after 6 guesses even without solving (board only has 6 rows)
+    if (!started || player.gameStatus !== 'playing' || botSolver.solved || botSolver.guesses.length >= 6) return
 
     const id = setInterval(() => {
       setBotSolver(prev => {
-        if (prev.solved || player.gameStatus !== 'playing') return prev
+        if (prev.solved || prev.guesses.length >= 6 || player.gameStatus !== 'playing') return prev
 
         // Bot makes a real guess using solver logic
         const next = botMakeGuess(prev, puzzle.word)
@@ -76,7 +78,7 @@ export function DuelPage({ puzzle, settings, stats, onWin, onLoss, onBack, onSet
     }, BOT_GUESS_INTERVAL_MS)
 
     return () => clearInterval(id)
-  }, [started, player.gameStatus, botSolver.solved, puzzle.word])
+  }, [started, player.gameStatus, botSolver.solved, botSolver.guesses.length, puzzle.word])
 
   // Player keyboard
   const handleKey = useCallback((key: string) => {
@@ -128,7 +130,7 @@ export function DuelPage({ puzzle, settings, stats, onWin, onLoss, onBack, onSet
     const emojiMap = { correct: '🟩', present: '🟨', absent: '⬛' }
     const grid = player.guesses.map(g => g.result.map(r => emojiMap[r]).join('')).join('\n')
     const result = playerWon === true ? 'WON' : playerWon === false ? 'LOST' : 'DRAW'
-    const text = `DailyDuel Duel\n${result} in ${player.guesses.length} guesses\n\n${grid}\n\ndailyduel.app`
+    const text = `DailyDuel Duel\n${result} in ${player.guesses.length} guesses\n\n${grid}\n\n${SITE_HOST}`
     navigator.clipboard.writeText(text).catch(() => {})
   }
 
@@ -247,7 +249,7 @@ export function DuelPage({ puzzle, settings, stats, onWin, onLoss, onBack, onSet
           guesses={player.guesses.length}
           opponentName="RIVAL BOT"
           opponentTime={botTimeMs}
-          xpEarned={playerWon === true ? 30 : 10}
+          xpEarned={playerWon === true ? XP_WIN : XP_LOSS}
           stats={stats}
           onPlayAgain={handleRestart}
           onHome={() => {
