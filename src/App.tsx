@@ -4,16 +4,17 @@ import { PracticePage } from './pages/PracticePage'
 import { HomePage } from './pages/HomePage'
 import { SettingsDialog } from './components/ui/SettingsDialog'
 import { getDailyPuzzle, getPuzzleForDate } from './lib/daily'
-import { loadStats, saveStats, type Stats } from './lib/stats'
+import { loadStats, saveStats, addXP, type Stats } from './lib/stats'
 import { loadSettings, type Settings } from './lib/settings'
 
 type Page = 'home' | 'practice' | 'duel' | 'stats' | 'settings'
 
-function parseChallengeUrl(): { date: string | null } {
-  const params = new URLSearchParams(window.location.search)
-  const date = params.get('challenge')
-  return { date }
-}
+// XP rewards per game outcome
+const XP_WIN = 30
+const XP_LOSS = 10
+
+// Parse once — URL doesn't change during the session
+const challengeDate = new URLSearchParams(window.location.search).get('challenge')
 
 export default function App() {
   const [page, setPage] = useState<Page>('home')
@@ -21,12 +22,9 @@ export default function App() {
   const [settings, setSettings] = useState<Settings>(() => loadSettings())
   const [showSettings, setShowSettings] = useState(false)
 
-  // Parse challenge from URL
-  const { date: challengeDate } = parseChallengeUrl()
   const [puzzle] = useState(() => {
     if (challengeDate) {
-      const d = new Date(challengeDate + 'T00:00:00')
-      return getPuzzleForDate ? getPuzzleForDate(d) : getDailyPuzzle()
+      return getPuzzleForDate(new Date(challengeDate + 'T00:00:00'))
     }
     return getDailyPuzzle()
   })
@@ -42,6 +40,10 @@ export default function App() {
     }
   }, [settings.contrast])
 
+  useEffect(() => {
+    document.documentElement.classList.toggle('no-anim', !settings.animations)
+  }, [settings.animations])
+
   const handleWin = (timeMs: number) => {
     setStats(s => {
       const updated = {
@@ -56,7 +58,7 @@ export default function App() {
       }
       const key = `dailyduel-day-${new Date().toISOString().slice(0, 10)}`
       localStorage.setItem(key, 'won')
-      return updated
+      return addXP(XP_WIN)(updated)
     })
   }
 
@@ -71,7 +73,7 @@ export default function App() {
       }
       const key = `dailyduel-day-${new Date().toISOString().slice(0, 10)}`
       localStorage.setItem(key, 'lost')
-      return updated
+      return addXP(XP_LOSS)(updated)
     })
   }
 
@@ -108,6 +110,8 @@ export default function App() {
             puzzle={puzzle}
             settings={settings}
             stats={stats}
+            onWin={handleWin}
+            onLoss={handleLoss}
             onBack={() => setPage('home')}
             onSettings={() => setShowSettings(true)}
           />

@@ -12,7 +12,7 @@ interface DuelBoardProps {
 
 export function DuelBoard({ playerName, guesses, currentGuess, isCurrentPlayer, solved }: DuelBoardProps) {
   return (
-    <div className={`flex flex-col items-center gap-2 p-3 rounded-3xl border-2 transition-all duration-300 ${
+    <div className={`flex flex-col items-center gap-2 p-2 sm:p-3 rounded-3xl border-2 transition-all duration-300 ${
       isCurrentPlayer
         ? 'border-[#90CAF9] bg-[#E3F2FD] shadow-md'
         : 'border-[#E8E4DF] bg-[#F8FAFB]'
@@ -40,6 +40,7 @@ export function DuelBoard({ playerName, guesses, currentGuess, isCurrentPlayer, 
                       letter={guessData.word[colIdx] ?? ''}
                       status={guessData.result[colIdx]}
                       delay={colIdx * 60}
+                      size="sm"
                     />
                   )
                 }
@@ -49,10 +50,11 @@ export function DuelBoard({ playerName, guesses, currentGuess, isCurrentPlayer, 
                       key={colIdx}
                       letter={currentGuess[colIdx]}
                       status="empty"
+                      size="sm"
                     />
                   )
                 }
-                return <Tile key={colIdx} letter="" status="empty" />
+                return <Tile key={colIdx} letter="" status="empty" size="sm" />
               })}
             </div>
           )

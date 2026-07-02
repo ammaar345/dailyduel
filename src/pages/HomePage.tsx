@@ -6,6 +6,7 @@ import { playClick } from '../lib/sounds'
 import { CrownIcon, GearIcon, FireIcon, TrophyIcon, HeartIcon, TargetIcon, CrossedSwordsIcon, StarIcon, ClipboardIcon } from '../components/ui/Icons'
 import { XpModal } from '../components/ui/XpModal'
 import { AdBanner } from '../components/ui/AdBanner'
+import { MarshmallowRain } from '../components/ui/Marshmallow'
 
 interface HomePageProps {
   stats: Stats
@@ -40,49 +41,6 @@ function getMotd(stats: Stats, todayPlayed: boolean): { line1: string; line2: st
   if (stats.currentStreak >= 3) return { line1: `${stats.currentStreak}-day streak!`, line2: 'Keep it alive — solve today\'s puzzle.' }
   if (stats.gamesWon > stats.gamesPlayed / 2) return { line1: 'You\'re on a roll.', line2: 'Today\'s puzzle is waiting for you.' }
   return { line1: 'A new puzzle is ready.', line2: 'Solve it before the bot does.' }
-}
-
-// SVG marshmallow — puffy pillow shape with bold outline, 3D shading, soft volume
-function Marshmallow({ color, shadow, width, height, delay }: { color: string; shadow: string; width: number; height: number; delay: string }) {
-  return (
-    <svg
-      width={width}
-      height={height}
-      viewBox="0 0 36 44"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="animate-marshmallow-float"
-      style={{ animationDelay: delay }}
-    >
-      {/* Soft drop shadow */}
-      <ellipse cx="18" cy="42" rx="12" ry="3" fill="#000" fillOpacity="0.05" />
-
-      {/* Main pillow body — super round, wide & short */}
-      <rect x="4" y="8" width="28" height="28" rx="14" ry="14" fill={color} stroke={shadow} strokeWidth="2.5" />
-
-      {/* Top puffy dome */}
-      <ellipse cx="18" cy="12" rx="13" ry="8" fill={color} stroke={shadow} strokeWidth="2.5" />
-      {/* Cover inner stroke overlap */}
-      <ellipse cx="18" cy="12.5" rx="11" ry="5.5" fill={color} />
-
-      {/* Bottom puffy dome */}
-      <ellipse cx="18" cy="32" rx="13" ry="8" fill={color} stroke={shadow} strokeWidth="2.5" />
-      <ellipse cx="18" cy="31.5" rx="11" ry="5.5" fill={color} />
-
-      {/* 3D left shading */}
-      <rect x="6" y="12" width="10" height="20" rx="5" fill={shadow} fillOpacity="0.12" />
-
-      {/* 3D right highlight */}
-      <rect x="22" y="12" width="6" height="18" rx="3" fill="white" fillOpacity="0.18" />
-
-      {/* Big specular highlight — puffy shine */}
-      <ellipse cx="13" cy="20" rx="5" ry="8" fill="white" fillOpacity="0.35" />
-      {/* Top shine crescent */}
-      <ellipse cx="15" cy="10" rx="6" ry="2.5" fill="white" fillOpacity="0.45" />
-      {/* Bottom rim light */}
-      <ellipse cx="17" cy="33" rx="6" ry="1.5" fill="white" fillOpacity="0.10" />
-    </svg>
-  )
 }
 
 // Floating cloud puff
@@ -120,10 +78,12 @@ function Sparkle({ x, y, delay, size }: { x: string; y: string; delay: string; s
 
 export function HomePage({ stats, settings, onNavigate, onSettings, challengeDate, onChallengeShare }: HomePageProps) {
   const [showXpModal, setShowXpModal] = useState(false)
+  const [copied, setCopied] = useState(false)
   const rank = getRank(stats.level)
   const rankColor = getRankColor(rank)
   const xpInLevel = stats.xp % 100
-  const streakWeek = getStreakWeek()
+  // Read localStorage once on mount, not on every render
+  const [streakWeek] = useState(getStreakWeek)
   const todayPlayed = streakWeek[6]?.played
   const motd = getMotd(stats, todayPlayed)
 
@@ -145,17 +105,8 @@ export function HomePage({ stats, settings, onNavigate, onSettings, challengeDat
         <div className="absolute -bottom-32 -left-[10%] w-[60vw] h-[60vw] max-w-[700px] max-h-[700px] bg-[#FFAB91]/[0.06] rounded-full blur-[100px] animate-cloud-drift" style={{ animationDelay: '-5s' }} />
         <div className="absolute bottom-[10%] -right-[20%] w-[50vw] h-[50vw] max-w-[600px] max-h-[600px] bg-[#90CAF9]/[0.07] rounded-full blur-[100px] animate-cloud-drift" style={{ animationDelay: '-2s' }} />
 
-        {/* Marshmallows — puffy pillow shapes scattered across edges */}
-        <div className="absolute top-[8%] left-[3%]"><Marshmallow color="#FFF0F5" shadow="#E8B4C8" width={30} height={37} delay="0s" /></div>
-        <div className="absolute top-[22%] right-[4%]"><Marshmallow color="#F0F0FF" shadow="#C8C0E0" width={26} height={32} delay="-2s" /></div>
-        <div className="absolute top-[45%] left-[2%]"><Marshmallow color="#FFF8F0" shadow="#E8D0B0" width={28} height={34} delay="-4s" /></div>
-        <div className="absolute top-[65%] right-[3%]"><Marshmallow color="#F5F0FF" shadow="#D0C0E8" width={27} height={33} delay="-6s" /></div>
-        <div className="absolute top-[80%] left-[5%]"><Marshmallow color="#FFF0F5" shadow="#E8B4C8" width={24} height={29} delay="-1.5s" /></div>
-        <div className="absolute top-[35%] right-[6%]"><Marshmallow color="#F0FFF0" shadow="#B8D8B0" width={22} height={27} delay="-8s" /></div>
-        <div className="absolute top-[55%] left-[7%]"><Marshmallow color="#FFFFF0" shadow="#E0E0B0" width={26} height={32} delay="-3.5s" /></div>
-        <div className="absolute top-[10%] right-[8%]"><Marshmallow color="#FFF5EE" shadow="#E0C8B8" width={22} height={27} delay="-5.5s" /></div>
-        <div className="absolute top-[90%] right-[5%]"><Marshmallow color="#F8F0FF" shadow="#D8C0E8" width={28} height={34} delay="-7s" /></div>
-        <div className="absolute top-[75%] left-[4%]"><Marshmallow color="#F0FFFF" shadow="#B0D8D8" width={24} height={29} delay="-9s" /></div>
+        {/* Marshmallow rain — realistic marshmallows gently falling */}
+        <MarshmallowRain />
 
         {/* Cloud puffs — scattered */}
         <CloudPuff x="2%" y="5%" scale={1.2} delay="0s" opacity={0.6} />
@@ -234,7 +185,7 @@ export function HomePage({ stats, settings, onNavigate, onSettings, challengeDat
       </div>
 
       {/* === CONTENT COLUMN === */}
-      <div className="w-full max-w-xl mx-auto px-5 py-4 flex flex-col items-center">
+      <div className="w-full max-w-xl mx-auto px-5 py-4 flex flex-col items-center page-enter">
 
         {/* Header row — title on left, settings on right */}
         <div className="w-full flex items-start justify-between mb-2">
@@ -422,21 +373,15 @@ export function HomePage({ stats, settings, onNavigate, onSettings, challengeDat
               if (settings.sound) playClick()
               if (onChallengeShare) {
                 onChallengeShare()
-                // Show feedback briefly
-                const btn = document.getElementById('challenge-btn')
-                if (btn) btn.textContent = 'Copied!'
-                setTimeout(() => {
-                  const btn2 = document.getElementById('challenge-btn')
-                  if (btn2) btn2.textContent = challengeDate ? 'Copy Challenge Link' : 'Copy Challenge Link'
-                }, 2000)
+                setCopied(true)
+                setTimeout(() => setCopied(false), 2000)
               }
             }}
-            id="challenge-btn"
             className="marsh-btn marsh-btn-primary w-full py-2.5 text-xs"
           >
             <span className="flex items-center justify-center gap-1.5">
               <ClipboardIcon size={14} className="text-white" />
-              {challengeDate ? 'Copy Challenge Link' : 'Copy Challenge Link'}
+              {copied ? 'Copied!' : 'Copy Challenge Link'}
             </span>
           </button>
         </div>

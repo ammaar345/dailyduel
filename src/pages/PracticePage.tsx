@@ -66,15 +66,10 @@ export function PracticePage({ puzzle, settings, stats, onWin, onLoss, onBack, o
     if (game.gameStatus === 'lost') onLossRef.current()
   }, [game.gameStatus, game.elapsedMs])
 
-  // Physical keyboard with animations
+  // Physical keyboard — key press animation is handled inside GameKeyboard
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (game.gameStatus !== 'playing') return
-
-      const key = e.key === 'Enter' ? 'ENTER' : e.key === 'Backspace' ? '⌫' : e.key.toUpperCase()
-      const button = document.querySelector(`button[data-key="${key}"]`)
-      button?.classList.add('pressed')
-      setTimeout(() => button?.classList.remove('pressed'), 200)
 
       if (e.key === 'Enter') handleKey('ENTER')
       else if (e.key === 'Backspace') handleKey('⌫')
@@ -97,7 +92,7 @@ export function PracticePage({ puzzle, settings, stats, onWin, onLoss, onBack, o
   }
 
   return (
-    <div className="min-h-dvh flex flex-col items-center px-4 py-4 max-w-lg mx-auto">
+    <div className="min-h-dvh flex flex-col items-center px-4 py-4 max-w-lg mx-auto page-enter">
       {/* Header */}
       <div className="flex items-center justify-between w-full mb-4">
         <button
@@ -175,6 +170,7 @@ export function PracticePage({ puzzle, settings, stats, onWin, onLoss, onBack, o
           won={game.gameStatus === 'won'}
           timeMs={game.elapsedMs}
           guesses={game.guesses.length}
+          xpEarned={game.gameStatus === 'won' ? 30 : 10}
           stats={stats}
           onPlayAgain={handleRestart}
           onHome={() => {

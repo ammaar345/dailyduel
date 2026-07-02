@@ -8,7 +8,7 @@ import type { Puzzle } from '../lib/daily'
 import type { Stats } from '../lib/stats'
 import type { Settings } from '../lib/settings'
 import { playKeyClick, playBackspace, playCorrect, playWin, playLose, playClick } from '../lib/sounds'
-import { BackIcon } from '../components/ui/Icons'
+import { BackIcon, GearIcon } from '../components/ui/Icons'
 import { ColorKey } from '../components/game/ColorKey'
 import { GameTimer } from '../components/game/GameTimer'
 import { AdBanner } from '../components/ui/AdBanner'
@@ -17,6 +17,8 @@ interface DuelPageProps {
   puzzle: Puzzle
   settings: Settings
   stats: Stats
+  onWin: (timeMs: number) => void
+  onLoss: () => void
   onBack: () => void
   onSettings: () => void
 }
@@ -24,15 +26,16 @@ interface DuelPageProps {
 // Bot difficulty config — decent pace, not too fast/slow
 const BOT_GUESS_INTERVAL_MS = 3500  // time between bot guesses
 
-export function DuelPage({ puzzle, settings, stats, onBack }: DuelPageProps) {
+export function DuelPage({ puzzle, settings, stats, onWin, onLoss, onBack, onSettings }: DuelPageProps) {
   const [player, setPlayer] = useState(createGameState)
   const [botSolver, setBotSolver] = useState(createBotSolver)
   const [countdown, setCountdown] = useState(3)
   const [started, setStarted] = useState(false)
   const [playerWon, setPlayerWon] = useState<boolean | null>(null)
   const [invalidMsg, setInvalidMsg] = useState(false)
-  const [botSolveTimeMs] = useState(() => 12000 + Math.random() * 13000) // 12-25s
   const botStartTimeRef = useRef<number>(0)
+  const botSolvedAtRef = useRef<number>(0) // actual bot solve timestamp
+  const reportedRef = useRef(false) // guard: report duel result to stats once
 
   const showInvalid = useCallback(() => {
     setInvalidMsg(true)
@@ -63,6 +66,7 @@ export function DuelPage({ puzzle, settings, stats, onBack }: DuelPageProps) {
 
         // Check if bot solved
         if (next.solved) {
+          botSolvedAtRef.current = Date.now()
           // Bot solved — player loses unless they already won
           setPlayerWon(w => w === true ? true : false)
         }
@@ -98,15 +102,10 @@ export function DuelPage({ puzzle, settings, stats, onBack }: DuelPageProps) {
     })
   }, [started, player.gameStatus, puzzle.word, settings.sound, showInvalid])
 
-  // Physical keyboard with animations
+  // Physical keyboard — key press animation is handled inside GameKeyboard
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (!started || player.gameStatus !== 'playing') return
-
-      const key = e.key === 'Enter' ? 'ENTER' : e.key === 'Backspace' ? '⌫' : e.key.toUpperCase()
-      const button = document.querySelector(`button[data-key="${key}"]`)
-      button?.classList.add('pressed')
-      setTimeout(() => button?.classList.remove('pressed'), 200)
 
       if (e.key === 'Enter') handleKey('ENTER')
       else if (e.key === 'Backspace') handleKey('⌫')
@@ -115,6 +114,15 @@ export function DuelPage({ puzzle, settings, stats, onBack }: DuelPageProps) {
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [started, player.gameStatus, handleKey])
+
+  // Report duel result to global stats exactly once per round
+  useEffect(() => {
+    if (playerWon === null || reportedRef.current) return
+    reportedRef.current = true
+    if (playerWon) onWin(player.elapsedMs)
+    else onLoss()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playerWon])
 
   const handleShare = () => {
     const emojiMap = { correct: '🟩', present: '🟨', absent: '⬛' }
@@ -134,10 +142,17 @@ export function DuelPage({ puzzle, settings, stats, onBack }: DuelPageProps) {
     setCountdown(3)
     setStarted(false)
     setPlayerWon(null)
+    botSolvedAtRef.current = 0
+    reportedRef.current = false
   }
 
+  // Actual bot solve time (falls back to elapsed-so-far if bot never solved)
+  const botTimeMs = botSolvedAtRef.current > 0
+    ? botSolvedAtRef.current - botStartTimeRef.current
+    : undefined
+
   return (
-    <div className="min-h-dvh flex flex-col items-center px-4 py-4 max-w-2xl mx-auto">
+    <div className="min-h-dvh flex flex-col items-center px-4 py-4 max-w-2xl mx-auto page-enter">
       {/* Header */}
       <div className="flex items-center justify-between w-full mb-2">
         <button
@@ -150,7 +165,15 @@ export function DuelPage({ puzzle, settings, stats, onBack }: DuelPageProps) {
           <BackIcon size={24} />
         </button>
         <h1 className="text-lg font-bold tracking-tight text-[#64B5F6] uppercase">Duel Mode</h1>
-        <div className="w-10" />
+        <button
+          onClick={() => {
+            if (settings.sound) playClick()
+            onSettings()
+          }}
+          className="w-10 h-10 flex items-center justify-center text-[#A0AEC0] hover:text-[#90CAF9] transition-colors cursor-pointer"
+        >
+          <GearIcon size={20} />
+        </button>
       </div>
 
       {/* Countdown */}
@@ -220,10 +243,11 @@ export function DuelPage({ puzzle, settings, stats, onBack }: DuelPageProps) {
       {bothDone && (
         <ResultScreen
           won={playerWon === true}
-          timeMs={player.gameStatus === 'won' ? player.elapsedMs : botSolveTimeMs}
+          timeMs={player.gameStatus === 'won' ? player.elapsedMs : (botTimeMs ?? player.elapsedMs)}
           guesses={player.guesses.length}
           opponentName="RIVAL BOT"
-          opponentTime={botSolveTimeMs}
+          opponentTime={botTimeMs}
+          xpEarned={playerWon === true ? 30 : 10}
           stats={stats}
           onPlayAgain={handleRestart}
           onHome={() => {

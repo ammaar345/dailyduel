@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { getRank, getRankColor } from '../../lib/stats'
 import { CrownIcon, SkullIcon, ClipboardIcon, TrophyIcon, StarIcon, HeartIcon } from '../ui/Icons'
 import { InterstitialAd } from '../ui/InterstitialAd'
+import { MarshmallowRain } from '../ui/Marshmallow'
 
 interface ResultScreenProps {
   won: boolean
@@ -9,13 +10,14 @@ interface ResultScreenProps {
   guesses: number
   opponentName?: string
   opponentTime?: number
+  xpEarned?: number
   stats: { level: number; currentStreak: number; maxStreak: number }
   onPlayAgain: () => void
   onHome: () => void
   onShare: () => void
 }
 
-export function ResultScreen({ won, timeMs, guesses, opponentName, opponentTime, stats, onPlayAgain, onHome, onShare }: ResultScreenProps) {
+export function ResultScreen({ won, timeMs, guesses, opponentName, opponentTime, xpEarned, stats, onPlayAgain, onHome, onShare }: ResultScreenProps) {
   const [showAd, setShowAd] = useState(true)
   const rank = getRank(stats.level)
   const rankColor = getRankColor(rank)
@@ -23,13 +25,21 @@ export function ResultScreen({ won, timeMs, guesses, opponentName, opponentTime,
     ? `${(timeMs / 1000).toFixed(1)}s`
     : `${Math.floor(timeMs / 60000)}m ${(Math.floor(timeMs / 1000) % 60)}s`
 
+  const winMessage = opponentName
+    ? (opponentTime !== undefined
+        ? `Beat ${opponentName} by ${((opponentTime - timeMs) / 1000).toFixed(1)}s`
+        : `Beat ${opponentName} to the solve!`)
+    : 'Puzzle conquered!'
+
   return (
     <>
       {/* Interstitial ad — shows after game, dismissable */}
       {showAd && <InterstitialAd onClose={() => setShowAd(false)} />}
 
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#4A5568]/20 backdrop-blur-md animate-slide-up">
-        <div className="bg-white rounded-[28px] p-8 max-w-sm w-full mx-4 text-center shadow-2xl border border-[#E8E4DF]">
+        {/* Celebration marshmallow shower on victory */}
+        {won && <MarshmallowRain count={10} speed={4} />}
+        <div className="relative bg-white rounded-[28px] p-8 max-w-sm w-full mx-4 text-center shadow-2xl border border-[#E8E4DF]">
           {/* Icon */}
           <div className="mb-4 animate-bounce-in">
             {won ? (
@@ -45,15 +55,20 @@ export function ResultScreen({ won, timeMs, guesses, opponentName, opponentTime,
           </h2>
 
           {won ? (
-            <p className="text-[#718096] mb-5 text-sm font-medium">
-              {opponentName
-                ? `Beat ${opponentName} by ${((opponentTime! - timeMs) / 1000).toFixed(1)}s`
-                : 'Puzzle conquered!'}
-            </p>
+            <p className="text-[#718096] mb-3 text-sm font-medium">{winMessage}</p>
           ) : (
-            <p className="text-[#718096] mb-5 text-sm font-medium">
+            <p className="text-[#718096] mb-3 text-sm font-medium">
               {opponentName ? `${opponentName} beat you.` : 'Better luck tomorrow!'}
             </p>
+          )}
+
+          {/* XP earned */}
+          {xpEarned !== undefined && (
+            <div className="flex justify-center mb-5">
+              <span className="animate-xp-pop inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#E3F2FD] text-[#1E88E5] text-xs font-bold font-mono-nums">
+                +{xpEarned} XP
+              </span>
+            </div>
           )}
 
           {/* Stats */}

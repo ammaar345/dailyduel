@@ -742,6 +742,36 @@ DailyDuel combines the proven daily game model with competitive gameplay to crea
 - Added `cloud-drift` animation for background blobs
 - Daily result saved to localStorage on win/loss (`dailyduel-day-YYYY-MM-DD`)
 
+### ✅ Completed Features (July 2, 2026)
+
+**Performance & Bug Fixes**
+- index.css deduplicated (~130 lines of repeated `:root`/`.kb-key`/`.dark` blocks removed)
+- XP system now live: win = 30 XP, loss = 10 XP (addXP was never called before — bar stuck at 0)
+- Duel results now update stats/streak/XP (DuelPage gets onWin/onLoss; reported once per round via ref guard)
+- Real bot solve time in duel results (was a random fake 12-25s number)
+- GameTimer: 100ms setInterval instead of 60fps rAF; freezes at final time instead of resetting to 0
+- Removed duplicate physical-keyboard "pressed" animation listeners from pages (GameKeyboard owns it)
+- HomePage: streak week read from localStorage once per mount; challenge-copy button uses React state (no DOM mutation)
+- `settings.animations` toggle now works (`.no-anim` class on root)
+
+**Mobile Friendly**
+- Keyboard keys: `min(8vw,40px)` letters / `min(12.5vw,68px)` wide keys — fits 375px, unchanged on desktop
+- Tile `size` prop: `md` (practice, 48→56px responsive) / `sm` (duel, `min(6.4vw,44px)`) — duel boards fit side-by-side on phones
+- `touch-action: manipulation` + transparent tap highlight (no 300ms delay / gray flash)
+- theme-color meta, viewport-fit=cover, data-URI crown favicon (was 404ing /vite.svg)
+
+**Marshmallow Rain**
+- `src/components/ui/Marshmallow.tsx`: realistic gradient-shaded SVG marshmallow (cylinder, powdery top, sheen; 4 tints) + `MarshmallowRain` layer
+- Homepage: 14 marshmallows gently rain (sway + slow tumble, GPU transform only, stable precomputed drops)
+- ResultScreen: marshmallow shower on victory + animated "+XP" chip
+- Optional realism upgrade: drop transparent `public/marshmallow.png` — auto-detected (one probe per session), replaces SVG
+- Page-enter fade/rise animation on all pages; keyboard hover lift (desktop only)
+
+**Cloudflare Pages Fix (site was blank)**
+- `vite.config.ts` base `/dailyduel/` → `./` (Cloudflare serves at root; absolute subpath 404'd all assets). Relative base works on BOTH Cloudflare and GitHub Pages
+- Root `_headers` was broken (forced `Content-Type: text/css` on JS + cached index.html immutable 1yr) → replaced with correct `public/_headers` (immutable only for /assets/*, no-cache for index)
+- **Deploy**: Cloudflare Pages builds the `main` branch → https://ddailyduel.pages.dev/
+
 ### 🔧 Current Status
 - Core gameplay features are fully functional
 - Smart bot with real Wordle strategy makes duel mode compelling
@@ -749,4 +779,6 @@ DailyDuel combines the proven daily game model with competitive gameplay to crea
 - Keyboard colors visible under night light
 - Homepage filled out with functional content (not decorative)
 - Practice mode is solo (no opponent), Duel mode vs smart bot (2 options total)
-- Next priorities: live timer, friend challenge link, GitHub Pages deploy
+- XP/rank progression works end-to-end; duels count toward stats
+- Mobile-friendly: no horizontal overflow at 375px in any mode
+- Next priorities: friend challenge polish, real matchmaking (WebRTC), Carbon placement ID

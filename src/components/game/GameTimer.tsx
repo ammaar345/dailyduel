@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 
 interface GameTimerProps {
   startTime: number
@@ -8,21 +8,18 @@ interface GameTimerProps {
 
 export function GameTimer({ startTime, running, className = '' }: GameTimerProps) {
   const [elapsed, setElapsed] = useState(0)
-  const rafRef = useRef<number>(0)
 
+  // Display shows tenths — a 100ms interval is enough, no need for 60fps rAF
   useEffect(() => {
-    if (!running || !startTime) {
+    if (!startTime) {
       setElapsed(0)
       return
     }
+    if (!running) return // freeze at final time when the game ends
 
-    const tick = () => {
-      setElapsed(Date.now() - startTime)
-      rafRef.current = requestAnimationFrame(tick)
-    }
-    rafRef.current = requestAnimationFrame(tick)
-
-    return () => cancelAnimationFrame(rafRef.current)
+    setElapsed(Date.now() - startTime)
+    const id = setInterval(() => setElapsed(Date.now() - startTime), 100)
+    return () => clearInterval(id)
   }, [running, startTime])
 
   const seconds = (elapsed / 1000).toFixed(1)

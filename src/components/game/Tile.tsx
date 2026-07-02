@@ -4,6 +4,8 @@ interface TileProps {
   letter: string
   status: 'empty' | 'correct' | 'present' | 'absent'
   delay?: number
+  /** md = full board (practice), sm = compact side-by-side duel boards */
+  size?: 'md' | 'sm'
 }
 
 function getTileStyle(status: string): { bg: string; border: string; text: string } {
@@ -19,15 +21,18 @@ function getTileStyle(status: string): { bg: string; border: string; text: strin
   }
 }
 
-function TileInner({ letter, status, delay = 0 }: TileProps) {
+function TileInner({ letter, status, delay = 0, size = 'md' }: TileProps) {
   const isEmpty = status === 'empty' && !letter
   const colors = isEmpty ? null : getTileStyle(status)
+  const sizeClasses = size === 'sm'
+    ? 'w-[min(6.4vw,44px)] h-[min(6.4vw,44px)] text-[min(3.6vw,1.15rem)] rounded-lg border'
+    : 'w-12 h-12 text-xl sm:w-14 sm:h-14 sm:text-2xl rounded-2xl border-2'
 
   return (
     <div
       className={`
-        tile-dither relative w-14 h-14 flex items-center justify-center
-        text-2xl font-semibold rounded-2xl transition-all duration-200 border-2
+        tile-dither relative flex items-center justify-center
+        font-semibold transition-all duration-200 ${sizeClasses}
         ${isEmpty ? 'bg-[#FAFBFC] border-[#E8E4DF] text-transparent' : ''}
         ${status !== 'empty' ? 'animate-pop-in' : ''}
       `}

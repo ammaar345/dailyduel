@@ -41,9 +41,9 @@ function GameKeyboardInner({ onKey, keyStates }: GameKeyboardProps) {
   }, [])
 
   return (
-    <div className="flex flex-col gap-1.5 items-center mt-4">
+    <div className="flex flex-col gap-1.5 items-center mt-4 w-full">
       {ROWS.map((row, rowIdx) => (
-        <div key={rowIdx} className="flex gap-1.5">
+        <div key={rowIdx} className="flex gap-1 sm:gap-1.5 justify-center w-full">
           {row.map((key) => {
             const isWide = key === 'ENTER' || key === '⌫'
             const state = keyStates[key]
@@ -55,10 +55,10 @@ function GameKeyboardInner({ onKey, keyStates }: GameKeyboardProps) {
                 data-key={key}
                 onClick={() => handleClick(key)}
                 className={`
-                  kb-key h-14 font-semibold text-sm
+                  kb-key h-12 sm:h-14 font-semibold text-sm
                   flex items-center justify-center cursor-pointer
                   select-none
-                  ${isWide ? 'w-[68px] text-xs' : 'w-10'}
+                  ${isWide ? 'w-[min(12.5vw,68px)] text-xs' : 'w-[min(8vw,40px)]'}
                 `}
                 style={{
                   background: colors.bg,

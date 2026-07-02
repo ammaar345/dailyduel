@@ -35,39 +35,6 @@
   --tile-empty: #FAFBFC;
   --tile-empty-border: #E8E4DF;
   /* Shadows — soft blue tint, gentle */
-  --bg-primary: #F8F6F2;
-  --bg-secondary: #EAF4F8;
-  --surface: #FFFFFF;
-  --surface-warm: #F0F7FA;
-  --text-primary: #4A5568;
-  --text-secondary: #718096;
-  --text-muted: #A0AEC0;
-  --accent: #90CAF9;
-  --accent-deep: #64B5F6;
-  --accent-soft: #E3F2FD;
-  --sky: #81D4FA;
-  --sky-soft: #E1F5FE;
-  --peach: #FFAB91;
-  --peach-soft: #FBE9E7;
-  --mint: #80CBC4;
-  --mint-soft: #E0F2F1;
-  --lavender: #B39DDB;
-  --lavender-soft: #EDE7F6;
-  --amber: #FFD54F;
-  --amber-soft: #FFF8E1;
-  --border: #E8E4DF;
-  --border-warm: #DCE8EF;
-  --tile-correct: #A5D6A7;
-  --tile-correct-text: #1B5E20;
-  --tile-correct-border: #43A047;
-  --tile-present: #FFE082;
-  --tile-present-text: #E65100;
-  --tile-present-border: #FFB300;
-  --tile-absent: #ECEFF1;
-  --tile-absent-text: #546E7A;
-  --tile-empty: #FAFBFC;
-  --tile-empty-border: #E8E4DF;
-  /* Shadows — soft blue tint, gentle */
   --shadow-card: 0 4px 24px rgba(144, 202, 249, 0.1), 0 1px 4px rgba(144, 202, 249, 0.06);
   --shadow-soft: 0 6px 32px rgba(144, 202, 249, 0.08);
   --shadow-button: 0 4px 16px rgba(144, 202, 249, 0.18);
@@ -83,6 +50,14 @@ body {
   font-family: 'Fredoka', 'Comic Neue', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   min-height: 100dvh;
+  /* Mobile: kill tap highlight + double-tap zoom delay */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  overflow-x: hidden;
+}
+
+button {
+  touch-action: manipulation;
 }
 
 #root {
@@ -484,15 +459,6 @@ body {
   border-radius: 3px;
 }
 
-/* Contrast themes — override tile/keyboard colors */
-:root {
-  /* Light (default) — keep existing vars */
-  --bg-primary: #F8F6F2;
-  --bg-secondary: #EAF4F8;
-  --surface: #FFFFFF;
-  --surface-warm: #F0F7FA;
-}
-
 /* High contrast mode — stronger borders, lighter colors */
 .high {
   --bg-primary: #F8F6F2;
@@ -559,20 +525,6 @@ body {
   --surface-warm: #334155;
 }
 
-/* Keyboard theme overrides */
-.kb-key {
-  transition: all 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
-  border-radius: 12px;
-  border: none;
-  font-weight: 600;
-  font-family: 'Fredoka', sans-serif;
-  position: relative;
-  overflow: hidden;
-  background: var(--tile-empty);
-  color: var(--text-primary);
-  box-shadow: 0 2px 8px rgba(144, 202, 249, 0.06);
-}
-
 /* Keyboard state colors */
 .kb-key.correct {
   background: var(--tile-correct-border);
@@ -592,26 +544,64 @@ body {
   border: 1.5px solid var(--tile-absent-border);
 }
 
-/* Dark contrast — navy blue theme */
-.dark {
-  --tile-correct: #4FC3F7;
-  --tile-correct-text: #0D47A1;
-  --tile-correct-border: #03A9F4;
-  --tile-present: #FFB74D;
-  --tile-present-text: #E65100;
-  --tile-present-border: #FF9100;
-  --tile-absent: #37474F;
-  --tile-absent-text: #B0BEC5;
-  --tile-absent-border: #455A64;
-  --tile-empty: #263238;
-  --tile-empty-border: #37474F;
-  --text-primary: #FFFFFF;
-  --text-secondary: #B0BEC5;
-  --border: #455A64;
-  --bg-primary: #0D1B2A;
-  --bg-secondary: #1B263B;
-  --surface: #1E293B;
-  --surface-warm: #334155;
+/* Marshmallow rain — gentle fall with sway + slow tumble */
+@keyframes marshmallow-rain {
+  0% {
+    transform: translateY(-8vh) translateX(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(22vh) translateX(14px) rotate(28deg);
+  }
+  50% {
+    transform: translateY(52vh) translateX(-10px) rotate(58deg);
+  }
+  75% {
+    transform: translateY(80vh) translateX(12px) rotate(84deg);
+  }
+  100% {
+    transform: translateY(112vh) translateX(-6px) rotate(115deg);
+  }
+}
+
+.animate-marshmallow-rain {
+  animation: marshmallow-rain linear infinite;
+  will-change: transform;
+}
+
+/* Page enter — soft fade + rise on route change */
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-enter {
+  animation: page-enter 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Keyboard key hover lift (desktop only) */
+@media (hover: hover) {
+  .kb-key:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(144, 202, 249, 0.16);
+  }
+}
+
+/* XP chip pop on result screen */
+@keyframes xp-pop {
+  0% { transform: scale(0.4); opacity: 0; }
+  60% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-xp-pop {
+  animation: xp-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+}
+
+/* Animations toggle off (settings) */
+.no-anim *, .no-anim *::before, .no-anim *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
 }
 
 /* Reduced motion */
