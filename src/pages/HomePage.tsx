@@ -7,13 +7,14 @@ import { CrownIcon, GearIcon, FireIcon, TrophyIcon, HeartIcon, TargetIcon, Cross
 import { XpModal } from '../components/ui/XpModal'
 import { AdBanner } from '../components/ui/AdBanner'
 import { MarshmallowRain } from '../components/ui/Marshmallow'
+import type { Challenge } from '../lib/challenge'
 
 interface HomePageProps {
   stats: Stats
   settings: Settings
   onNavigate: (page: 'practice' | 'duel' | 'stats' | 'settings') => void
   onSettings: () => void
-  challengeDate?: string | null
+  challenge?: Challenge | null
   onChallengeShare?: () => string
 }
 
@@ -169,7 +170,7 @@ function Sparkle({ x, y, delay, size }: { x: string; y: string; delay: string; s
   )
 }
 
-export function HomePage({ stats, settings, onNavigate, onSettings, challengeDate, onChallengeShare }: HomePageProps) {
+export function HomePage({ stats, settings, onNavigate, onSettings, challenge, onChallengeShare }: HomePageProps) {
   const [showXpModal, setShowXpModal] = useState(false)
   const [copied, setCopied] = useState(false)
   const rank = getRank(stats.level)
@@ -319,13 +320,24 @@ export function HomePage({ stats, settings, onNavigate, onSettings, challengeDat
 
         {/* ACTION BUTTONS — right after header */}
         <div className="flex flex-col gap-2.5 w-full mb-3">
+          {challenge?.result && (
+            <button
+              onClick={() => handleNav('practice')}
+              className="marsh-btn marsh-btn-primary w-full py-4 text-sm font-semibold group/btn animate-pulse-soft"
+            >
+              <span className="flex items-center justify-center gap-2">
+                <CrossedSwordsIcon size={18} className="text-white group-hover/btn:scale-125 transition-transform duration-300" />
+                Accept Challenge — beat {(challenge.result.timeMs / 1000).toFixed(1)}s
+              </span>
+            </button>
+          )}
           <button
             onClick={() => handleNav('duel')}
             className="marsh-btn marsh-btn-secondary w-full py-4 text-sm font-semibold group/btn"
           >
             <span className="flex items-center justify-center gap-2">
               <CrossedSwordsIcon size={18} className="text-[#64B5F6] group-hover/btn:scale-125 transition-transform duration-300" />
-              Start Duel
+              Duel the Bot
             </span>
           </button>
           <button
@@ -468,12 +480,14 @@ export function HomePage({ stats, settings, onNavigate, onSettings, challengeDat
         <div className="w-full marsh-card p-3.5 mb-3 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <CrossedSwordsIcon size={16} className="text-[#FFD54F]" />
-            <span className="text-xs font-semibold text-[#718096] uppercase tracking-wider">Friend Challenge</span>
+            <span className="text-xs font-semibold text-[#718096] uppercase tracking-wider">Duel a Friend</span>
           </div>
           <p className="text-[11px] text-[#718096] mb-2.5">
-            {challengeDate
-              ? `Puzzle from ${new Date(challengeDate + 'T00:00:00').toLocaleDateString()}`
-              : 'Send a friend the same daily puzzle and compare solve times.'}
+            {challenge?.result
+              ? `Your rival solved the ${new Date(challenge.date + 'T00:00:00').toLocaleDateString()} puzzle in ${(challenge.result.timeMs / 1000).toFixed(1)}s (${challenge.result.guesses}/6). Beat it, then send your time back.`
+              : challenge
+                ? `Puzzle from ${new Date(challenge.date + 'T00:00:00').toLocaleDateString()} — solve it and compare times.`
+                : 'Win today, then send this link — it carries your time for a friend to beat.'}
           </p>
           <button
             onClick={() => {

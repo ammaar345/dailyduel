@@ -6,11 +6,12 @@ import { SettingsDialog } from './components/ui/SettingsDialog'
 import { getDailyPuzzle, getPuzzleForDate } from './lib/daily'
 import { loadStats, saveStats, addXP, XP_WIN, XP_LOSS, type Stats } from './lib/stats'
 import { loadSettings, type Settings } from './lib/settings'
+import { parseChallenge, buildChallengeUrl } from './lib/challenge'
 
 type Page = 'home' | 'practice' | 'duel' | 'stats' | 'settings'
 
 // Parse once — URL doesn't change during the session
-const challengeDate = new URLSearchParams(window.location.search).get('challenge')
+const challenge = parseChallenge()
 
 export default function App() {
   const [page, setPage] = useState<Page>('home')
@@ -19,8 +20,8 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false)
 
   const [puzzle] = useState(() => {
-    if (challengeDate) {
-      return getPuzzleForDate(new Date(challengeDate + 'T00:00:00'))
+    if (challenge) {
+      return getPuzzleForDate(new Date(challenge.date + 'T00:00:00'))
     }
     return getDailyPuzzle()
   })
@@ -82,10 +83,9 @@ export default function App() {
     localStorage.setItem('dailyduel-settings', JSON.stringify(newSettings))
   }
 
-  // Challenge share handler
+  // Challenge share handler — link carries your best time today if you've won
   const handleChallengeShare = () => {
-    const today = new Date().toISOString().slice(0, 10)
-    const url = `${window.location.origin}${window.location.pathname}?challenge=${today}`
+    const url = buildChallengeUrl()
     navigator.clipboard.writeText(url).catch(() => {})
     return url
   }
@@ -98,6 +98,7 @@ export default function App() {
             puzzle={puzzle}
             settings={settings}
             stats={stats}
+            rival={challenge?.result ?? null}
             onWin={handleWin}
             onLoss={handleLoss}
             onBack={() => setPage('home')}
@@ -123,7 +124,7 @@ export default function App() {
             settings={settings}
             onNavigate={setPage}
             onSettings={() => setShowSettings(true)}
-            challengeDate={challengeDate}
+            challenge={challenge}
             onChallengeShare={handleChallengeShare}
           />
         )

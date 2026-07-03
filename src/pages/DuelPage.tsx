@@ -10,6 +10,7 @@ import type { Settings } from '../lib/settings'
 import { playKeyClick, playBackspace, playCorrect, playWin, playLose, playClick } from '../lib/sounds'
 import { BackIcon, GearIcon } from '../components/ui/Icons'
 import { SITE_HOST } from '../lib/site'
+import { saveDayResult, buildChallengeUrl } from '../lib/challenge'
 import { ColorKey } from '../components/game/ColorKey'
 import { GameTimer } from '../components/game/GameTimer'
 import { AdBanner } from '../components/ui/AdBanner'
@@ -121,8 +122,12 @@ export function DuelPage({ puzzle, settings, stats, onWin, onLoss, onBack, onSet
   useEffect(() => {
     if (playerWon === null || reportedRef.current) return
     reportedRef.current = true
-    if (playerWon) onWin(player.elapsedMs)
-    else onLoss()
+    if (playerWon) {
+      saveDayResult(puzzle.date, player.elapsedMs, player.guesses.length)
+      onWin(player.elapsedMs)
+    } else {
+      onLoss()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playerWon])
 
@@ -130,7 +135,8 @@ export function DuelPage({ puzzle, settings, stats, onWin, onLoss, onBack, onSet
     const emojiMap = { correct: '🟩', present: '🟨', absent: '⬛' }
     const grid = player.guesses.map(g => g.result.map(r => emojiMap[r]).join('')).join('\n')
     const result = playerWon === true ? 'WON' : playerWon === false ? 'LOST' : 'DRAW'
-    const text = `DailyDuel Duel\n${result} in ${player.guesses.length} guesses\n\n${grid}\n\n${SITE_HOST}`
+    const raceLink = playerWon === true ? `Race me: ${buildChallengeUrl()}` : SITE_HOST
+    const text = `DailyDuel Duel\n${result} in ${player.guesses.length} guesses\n\n${grid}\n\n${raceLink}`
     navigator.clipboard.writeText(text).catch(() => {})
   }
 
