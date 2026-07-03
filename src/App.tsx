@@ -40,35 +40,39 @@ export default function App() {
     document.documentElement.classList.toggle('no-anim', !settings.animations)
   }, [settings.animations])
 
+  // Streak and the daily W/L record are decided by the FIRST completed game of
+  // the day — replays still earn XP and count games, but can't farm or kill streaks.
   const handleWin = (timeMs: number) => {
     setStats(s => {
+      const key = `dailyduel-day-${new Date().toISOString().slice(0, 10)}`
+      const firstOfDay = !localStorage.getItem(key)
+      if (firstOfDay) localStorage.setItem(key, 'won')
       const updated = {
         ...s,
         gamesPlayed: s.gamesPlayed + 1,
         gamesWon: s.gamesWon + 1,
-        currentStreak: s.currentStreak + 1,
-        maxStreak: Math.max(s.maxStreak, s.currentStreak + 1),
+        currentStreak: firstOfDay ? s.currentStreak + 1 : s.currentStreak,
+        maxStreak: firstOfDay ? Math.max(s.maxStreak, s.currentStreak + 1) : s.maxStreak,
         bestTime: s.bestTime === 0 ? timeMs : Math.min(s.bestTime, timeMs),
         totalPlayTime: s.totalPlayTime + timeMs,
         lastPlayed: Date.now(),
       }
-      const key = `dailyduel-day-${new Date().toISOString().slice(0, 10)}`
-      localStorage.setItem(key, 'won')
       return addXP(XP_WIN)(updated)
     })
   }
 
   const handleLoss = () => {
     setStats(s => {
+      const key = `dailyduel-day-${new Date().toISOString().slice(0, 10)}`
+      const firstOfDay = !localStorage.getItem(key)
+      if (firstOfDay) localStorage.setItem(key, 'lost')
       const updated = {
         ...s,
         gamesPlayed: s.gamesPlayed + 1,
         gamesWon: s.gamesWon,
-        currentStreak: 0,
+        currentStreak: firstOfDay ? 0 : s.currentStreak,
         lastPlayed: Date.now(),
       }
-      const key = `dailyduel-day-${new Date().toISOString().slice(0, 10)}`
-      localStorage.setItem(key, 'lost')
       return addXP(XP_LOSS)(updated)
     })
   }

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Stats } from '../lib/stats'
 import type { Settings } from '../lib/settings'
 import { getRank, getRankColor } from '../lib/stats'
@@ -41,6 +41,99 @@ function getMotd(stats: Stats, todayPlayed: boolean): { line1: string; line2: st
   if (stats.currentStreak >= 3) return { line1: `${stats.currentStreak}-day streak!`, line2: 'Keep it alive — solve today\'s puzzle.' }
   if (stats.gamesWon > stats.gamesPlayed / 2) return { line1: 'You\'re on a roll.', line2: 'Today\'s puzzle is waiting for you.' }
   return { line1: 'A new puzzle is ready.', line2: 'Solve it before the bot does.' }
+}
+
+// Rank ladder — level thresholds must match getRank() in lib/stats.ts
+const RANK_LADDER = [
+  { name: 'BRONZE', lv: 1 },
+  { name: 'SILVER', lv: 15 },
+  { name: 'GOLD', lv: 30 },
+  { name: 'PLATINUM', lv: 50 },
+  { name: 'DIAMOND', lv: 75 },
+  { name: 'CROWN', lv: 100 },
+]
+
+// Left side rail — rank ladder with current rank highlighted (xl+ screens only)
+function RankRail({ currentRank }: { currentRank: string }) {
+  return (
+    <div className="marsh-card p-4 w-full">
+      <div className="flex items-center gap-2 mb-3">
+        <CrownIcon size={16} className="text-[#E8B830]" />
+        <span className="text-xs font-semibold text-[#718096] uppercase tracking-wider">Rank Road</span>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        {RANK_LADDER.map(r => {
+          const active = r.name === currentRank
+          return (
+            <div
+              key={r.name}
+              className={`flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                active ? 'bg-[#E3F2FD] scale-[1.03] shadow-sm' : 'opacity-60'
+              }`}
+            >
+              <span className={getRankColor(r.name)}>{r.name}</span>
+              <span className="text-[#A0AEC0] font-mono-nums font-medium">Lv {r.lv}+</span>
+            </div>
+          )
+        })}
+      </div>
+      <p className="text-[10px] text-[#A0AEC0] mt-3 leading-snug">Every game earns XP. 100 XP per level.</p>
+    </div>
+  )
+}
+
+// Countdown to the next daily puzzle (UTC midnight — matches puzzle seeding)
+function usePuzzleCountdown(): string {
+  const [left, setLeft] = useState('')
+  useEffect(() => {
+    const tick = () => {
+      const now = new Date()
+      const next = new Date(now)
+      next.setUTCHours(24, 0, 0, 0)
+      const ms = next.getTime() - now.getTime()
+      const h = Math.floor(ms / 3600000)
+      const m = Math.floor((ms % 3600000) / 60000)
+      const s = Math.floor((ms % 60000) / 1000)
+      setLeft(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`)
+    }
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [])
+  return left
+}
+
+// Right side rail — next puzzle countdown + lifetime duel log (xl+ screens only)
+function DuelLogRail({ stats }: { stats: Stats }) {
+  const countdown = usePuzzleCountdown()
+  const bestTime = stats.bestTime > 0 ? `${(stats.bestTime / 1000).toFixed(1)}s` : '--'
+  return (
+    <div className="flex flex-col gap-3 w-full">
+      <div className="marsh-card p-4 text-center">
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <StarIcon size={14} className="text-[#FFD54F]" />
+          <span className="text-xs font-semibold text-[#718096] uppercase tracking-wider">Next Puzzle</span>
+        </div>
+        <div className="text-xl font-bold font-mono-nums text-[#4A5568]">{countdown}</div>
+        <p className="text-[10px] text-[#A0AEC0] mt-1">same word for everyone</p>
+      </div>
+      <div className="marsh-card p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <CrossedSwordsIcon size={14} className="text-[#80CBC4]" />
+          <span className="text-xs font-semibold text-[#718096] uppercase tracking-wider">Duel Log</span>
+        </div>
+        <div className="flex flex-col gap-2 text-xs font-medium text-[#718096]">
+          <div className="flex justify-between"><span>Fastest solve</span><span className="font-mono-nums font-bold text-[#4A5568]">{bestTime}</span></div>
+          <div className="flex justify-between"><span>Games played</span><span className="font-mono-nums font-bold text-[#4A5568]">{stats.gamesPlayed}</span></div>
+          <div className="flex justify-between"><span>Games won</span><span className="font-mono-nums font-bold text-[#4A5568]">{stats.gamesWon}</span></div>
+          <div className="flex justify-between"><span>Best streak</span><span className="font-mono-nums font-bold text-[#4A5568]">{stats.maxStreak}</span></div>
+        </div>
+      </div>
+      <div className="marsh-raised p-4 text-center">
+        <p className="text-[11px] text-[#718096] leading-relaxed">Challenge a friend — same puzzle, fastest solve wins the crown.</p>
+      </div>
+    </div>
+  )
 }
 
 // Floating cloud puff
@@ -154,6 +247,12 @@ export function HomePage({ stats, settings, onNavigate, onSettings, challengeDat
         <div className="absolute bottom-0 left-0 w-72 h-72 bg-[#80CBC4]/[0.05] rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-0 w-64 h-64 bg-[#FFD54F]/[0.05] rounded-full blur-3xl" />
 
+        {/* Mid-side warmth — fills hollow flanks on wide screens */}
+        <div className="absolute top-[30%] left-[4%] w-72 h-72 bg-[#B39DDB]/[0.10] rounded-full blur-[70px] animate-cloud-drift" style={{ animationDelay: '-2.5s' }} />
+        <div className="absolute top-[55%] right-[4%] w-72 h-72 bg-[#90CAF9]/[0.11] rounded-full blur-[70px] animate-cloud-drift" style={{ animationDelay: '-6s' }} />
+        <div className="absolute top-[12%] right-[10%] w-56 h-56 bg-[#FFAB91]/[0.08] rounded-full blur-[60px] animate-cloud-drift" style={{ animationDelay: '-4.5s' }} />
+        <div className="absolute bottom-[18%] left-[9%] w-56 h-56 bg-[#FFD54F]/[0.09] rounded-full blur-[60px] animate-cloud-drift" style={{ animationDelay: '-7s' }} />
+
         {/* Bottom wave */}
         <svg className="absolute -bottom-1 left-0 w-full" viewBox="0 0 400 80" fill="none" preserveAspectRatio="none">
           <path d="M0 50C80 20 160 60 240 30C300 10 360 40 400 25V80H0Z" fill="url(#hw1)" fillOpacity="0.10" />
@@ -184,8 +283,16 @@ export function HomePage({ stats, settings, onNavigate, onSettings, challengeDat
         </svg>
       </div>
 
+      {/* === THREE-COLUMN LAYOUT: rails visible on xl+, single column below === */}
+      <div className="w-full flex justify-center items-start gap-6 xl:px-8 page-enter">
+
+      {/* Left rail — rank ladder */}
+      <aside className="hidden xl:flex flex-col w-60 shrink-0 sticky top-6 pt-24">
+        <RankRail currentRank={rank} />
+      </aside>
+
       {/* === CONTENT COLUMN === */}
-      <div className="w-full max-w-xl mx-auto px-5 py-4 flex flex-col items-center page-enter">
+      <div className="w-full max-w-xl px-5 py-4 flex flex-col items-center">
 
         {/* Header row — title on left, settings on right */}
         <div className="w-full flex items-start justify-between mb-2">
@@ -397,6 +504,13 @@ export function HomePage({ stats, settings, onNavigate, onSettings, challengeDat
 
         {/* Bottom tagline */}
         <p className="text-[10px] text-[#A0AEC0]/50 tracking-widest uppercase font-medium mb-4">new puzzle daily at midnight</p>
+      </div>
+
+      {/* Right rail — countdown + duel log */}
+      <aside className="hidden xl:flex flex-col w-60 shrink-0 sticky top-6 pt-24">
+        <DuelLogRail stats={stats} />
+      </aside>
+
       </div>
 
       {/* XP Modal */}
