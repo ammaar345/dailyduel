@@ -765,6 +765,7 @@ DailyDuel combines the proven daily game model with competitive gameplay to crea
 - Homepage: 14 marshmallows gently rain (sway + slow tumble, GPU transform only, stable precomputed drops)
 - ResultScreen: marshmallow shower on victory + animated "+XP" chip
 - Optional realism upgrade: drop transparent `public/marshmallow.png` — auto-detected (one probe per session), replaces SVG
+- **DONE July 3, 2026**: sneaky's AI marshmallow live at `public/marshmallow.png` (256x343 transparent PNG, baby-blue powdery marshmallow). Full-size original kept at repo root `marshmallow-source.png` (432x578, not deployed). Rain imgs render width-only (height auto) to preserve aspect
 - Page-enter fade/rise animation on all pages; keyboard hover lift (desktop only)
 
 **Cloudflare Pages Fix (site was blank)**

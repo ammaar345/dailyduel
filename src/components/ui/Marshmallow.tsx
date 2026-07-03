@@ -150,10 +150,9 @@ export function MarshmallowRain({ count = 14, speed = 1, className = '' }: Marsh
             <img
               src={IMG_URL}
               width={d.size}
-              height={d.size}
               alt=""
               draggable={false}
-              style={{ transform: `rotate(${(i * 47) % 360}deg)` }}
+              style={{ height: 'auto', transform: `rotate(${(i * 47) % 360}deg)` }}
             />
           ) : (
             <MarshmallowSvg size={d.size} tint={TINTS[d.tint]} />
