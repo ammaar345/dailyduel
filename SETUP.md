@@ -24,18 +24,12 @@ Carbon Ads needs 10k monthly views; AdSense has **no minimum**. Code is already 
 4. AdSense shows a **verification code snippet** (looks like `<script async src="...ca-pub-XXXX...">`).
    - You do NOT need to paste the whole snippet. Just copy the `ca-pub-XXXXXXXXXXXXXXXX` id from it and send it to me (or paste it yourself, step 6) — the loader script in the app uses it automatically once configured.
    - If AdSense insists on seeing the snippet in the page `<head>` for verification, tell me and I'll add it to `index.html` — that's a 1-line change.
+   **DONE (July 3, 2026):** client id `ca-pub-4302153561917574` is already in `index.html` head + `AdBanner.tsx`. Verification script is live — AdSense can detect the site now.
 5. Submit for review. **Wait time: a few days to 2 weeks.** The site already has the privacy policy AdSense requires (https://ddailyduel.pages.dev/privacy).
-6. **After approval:**
-   a. In AdSense: **Ads → By ad unit → Display ads** → create one, name it `dailyduel-banner` → copy the **slot number** (10 digits)
-   b. Open `src/components/ui/AdBanner.tsx` and replace:
-      - `ADSENSE_CLIENT = 'ca-pub-XXXXXXXXXXXXXXXX'` → your real ca-pub id
-      - `ADSENSE_SLOT = 'XXXXXXXXXX'` → your slot number
-   c. Create the file `public/ads.txt` containing exactly one line (replace with your id):
-      ```
-      google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
-      ```
-      (AdSense → Account → ads.txt shows you the exact line. Required, or earnings get held.)
-   d. Commit + push to `main` (or just tell me the two IDs and I do b-d)
+6. **After approval — only 2 things left:**
+   a. In AdSense: **Ads → By ad unit → Display ads** → create one, name it `dailyduel-banner` → copy the **slot number** (10 digits) → send it to me, or paste into `ADSENSE_SLOT` in `src/components/ui/AdBanner.tsx` (currently `'XXXXXXXXXX'`). Ads stay hidden until this is filled.
+   b. `public/ads.txt` is already created with your id. Confirm the exact line matches what AdSense shows at **Account → ads.txt** (should be `google.com, pub-4302153561917574, DIRECT, f08c47fec0942fa0`). Required or earnings get held.
+   c. Commit + push to `main` (or tell me the slot and I do it)
 7. Ads appear on: homepage, practice page, duel page. Nothing shows until step 6 is done — that's intentional.
 
 ## 2. Cloudflare Web Analytics (free, cookie-free) — 2 min
@@ -105,7 +99,7 @@ Do these AFTER steps 2 & 3. Suggested order:
 | Mobile layout 375px+ | DONE |
 | Share links + og preview card | DONE |
 | Privacy policy | DONE (live at /privacy) |
-| AdSense | WAITING ON YOU — step 1 |
+| AdSense | client id wired + verification live; WAITING on Google review, then paste slot (step 6a) |
 | Analytics | WAITING ON YOU — step 2 |
 | Phone test | WAITING ON YOU — step 3 |
 | Custom domain | optional — step 4 |

@@ -13,22 +13,10 @@ import { useEffect, useRef, memo } from 'react'
  *
  * Renders nothing until both IDs are configured.
  */
-const ADSENSE_CLIENT = 'ca-pub-XXXXXXXXXXXXXXXX'
-const ADSENSE_SLOT = 'XXXXXXXXXX'
+const ADSENSE_CLIENT = 'ca-pub-4302153561917574'
+const ADSENSE_SLOT = 'XXXXXXXXXX' // TODO: create ad unit after approval, paste slot number here
 
 const configured = !ADSENSE_CLIENT.includes('X') && !ADSENSE_SLOT.includes('X')
-
-// Load the AdSense script once per page, not once per banner
-let scriptLoaded = false
-function loadAdSenseScript() {
-  if (scriptLoaded) return
-  scriptLoaded = true
-  const script = document.createElement('script')
-  script.async = true
-  script.crossOrigin = 'anonymous'
-  script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`
-  document.head.appendChild(script)
-}
 
 interface AdBannerProps {
   className?: string
@@ -39,9 +27,9 @@ export const AdBanner = memo(({ className = '' }: AdBannerProps) => {
   const pushedRef = useRef(false)
 
   useEffect(() => {
+    // adsbygoogle.js is loaded once in index.html <head>; here we just request a fill
     if (!configured || !insRef.current || pushedRef.current) return
     pushedRef.current = true
-    loadAdSenseScript()
     try {
       // @ts-expect-error — adsbygoogle is injected by the AdSense script
       ;(window.adsbygoogle = window.adsbygoogle || []).push({})
