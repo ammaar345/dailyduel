@@ -12,7 +12,7 @@ import type { Challenge } from '../lib/challenge'
 interface HomePageProps {
   stats: Stats
   settings: Settings
-  onNavigate: (page: 'practice' | 'duel' | 'stats' | 'settings') => void
+  onNavigate: (page: 'practice' | 'duel' | 'live' | 'stats' | 'settings') => void
   onSettings: () => void
   challenge?: Challenge | null
   onChallengeShare?: () => string
@@ -181,7 +181,7 @@ export function HomePage({ stats, settings, onNavigate, onSettings, challenge, o
   const todayPlayed = streakWeek[6]?.played
   const motd = getMotd(stats, todayPlayed)
 
-  const handleNav = (page: 'practice' | 'duel') => {
+  const handleNav = (page: 'practice' | 'duel' | 'live') => {
     if (settings.sound) playClick()
     onNavigate(page)
   }
@@ -331,6 +331,15 @@ export function HomePage({ stats, settings, onNavigate, onSettings, challenge, o
               </span>
             </button>
           )}
+          <button
+            onClick={() => handleNav('live')}
+            className="marsh-btn marsh-btn-primary w-full py-4 text-sm font-semibold group/btn"
+          >
+            <span className="flex items-center justify-center gap-2">
+              <CrossedSwordsIcon size={18} className="text-white group-hover/btn:scale-125 transition-transform duration-300" />
+              Duel a Friend — Live
+            </span>
+          </button>
           <button
             onClick={() => handleNav('duel')}
             className="marsh-btn marsh-btn-secondary w-full py-4 text-sm font-semibold group/btn"

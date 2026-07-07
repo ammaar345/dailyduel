@@ -2,19 +2,23 @@ import { useState, useEffect } from 'react'
 import { DuelPage } from './pages/DuelPage'
 import { PracticePage } from './pages/PracticePage'
 import { HomePage } from './pages/HomePage'
+import { RealtimeDuelPage } from './pages/RealtimeDuelPage'
 import { SettingsDialog } from './components/ui/SettingsDialog'
 import { getDailyPuzzle, getPuzzleForDate } from './lib/daily'
 import { loadStats, saveStats, addXP, XP_WIN, XP_LOSS, type Stats } from './lib/stats'
 import { loadSettings, type Settings } from './lib/settings'
 import { parseChallenge, buildChallengeUrl } from './lib/challenge'
+import { parseRoom } from './lib/rtc'
 
-type Page = 'home' | 'practice' | 'duel' | 'stats' | 'settings'
+type Page = 'home' | 'practice' | 'duel' | 'live' | 'stats' | 'settings'
 
 // Parse once — URL doesn't change during the session
 const challenge = parseChallenge()
+const roomCode = parseRoom()
 
 export default function App() {
-  const [page, setPage] = useState<Page>('home')
+  // A ?room= link drops you straight into the live duel lobby as the guest
+  const [page, setPage] = useState<Page>(roomCode ? 'live' : 'home')
   const [stats, setStats] = useState<Stats>(() => loadStats())
   const [settings, setSettings] = useState<Settings>(() => loadSettings())
   const [showSettings, setShowSettings] = useState(false)
@@ -111,6 +115,19 @@ export default function App() {
             puzzle={puzzle}
             settings={settings}
             stats={stats}
+            onWin={handleWin}
+            onLoss={handleLoss}
+            onBack={() => setPage('home')}
+            onSettings={() => setShowSettings(true)}
+          />
+        )
+      case 'live':
+        return (
+          <RealtimeDuelPage
+            puzzle={puzzle}
+            settings={settings}
+            stats={stats}
+            joinCode={roomCode}
             onWin={handleWin}
             onLoss={handleLoss}
             onBack={() => setPage('home')}

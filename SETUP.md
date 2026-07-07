@@ -84,7 +84,14 @@ Do these AFTER steps 2 & 3. Suggested order:
 ## 6. Later / optional money
 
 - **Gumroad "Duel Master" $5** (remove ads + exclusive crown): set up at gumroad.com when there's traffic; I build the purchase flow + unlock when you're ready
-- **Real-time PvP** (simultaneous duels vs friends): planned via PeerJS free broker, no account needed — say go and I build it. This is the biggest retention upgrade left.
+
+## Real-time PvP — DONE (July 6, 2026)
+
+Live simultaneous duels are built and verified. Homepage → **Duel a Friend — Live** → you get a room link → send it → friend opens it → 3-2-1 → both race the same daily puzzle live, side by side. First to solve wins.
+
+- Uses PeerJS's **free public broker** (0.peerjs.com) — no account, no server, no cost, nothing for you to configure.
+- Test it: open the site in two browsers (or phone + desktop), create a duel in one, paste the link in the other.
+- Caveat: the free broker is occasionally flaky/rate-limited. If the lobby can't connect it shows an error + suggests dueling the bot. If it becomes a problem at scale, a self-hosted PeerServer (tiny free-tier box) removes the dependency — tell me and I'll wire it.
 
 ## Known limitations (fine to ship)
 
