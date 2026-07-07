@@ -26,10 +26,12 @@ Carbon Ads needs 10k monthly views; AdSense has **no minimum**. Code is already 
    - If AdSense insists on seeing the snippet in the page `<head>` for verification, tell me and I'll add it to `index.html` — that's a 1-line change.
    **DONE (July 3, 2026):** client id `ca-pub-4302153561917574` is already in `index.html` head + `AdBanner.tsx`. Verification script is live — AdSense can detect the site now.
 5. Submit for review. **Wait time: a few days to 2 weeks.** The site already has the privacy policy AdSense requires (https://ddailyduel.pages.dev/privacy).
-6. **After approval — only 2 things left:**
-   a. In AdSense: **Ads → By ad unit → Display ads** → create one, name it `dailyduel-banner` → copy the **slot number** (10 digits) → send it to me, or paste into `ADSENSE_SLOT` in `src/components/ui/AdBanner.tsx` (currently `'XXXXXXXXXX'`). Ads stay hidden until this is filled.
-   b. `public/ads.txt` is already created with your id. Confirm the exact line matches what AdSense shows at **Account → ads.txt** (should be `google.com, pub-4302153561917574, DIRECT, f08c47fec0942fa0`). Required or earnings get held.
-   c. Commit + push to `main` (or tell me the slot and I do it)
+   **DONE (July 6, 2026):** ad unit `dailyduel-banner` created, slot `1301972363` wired into `AdBanner.tsx`. Manual banners now live on homepage + practice + duel pages.
+   **ads.txt** already live at /ads.txt with the correct line.
+
+   **IMPORTANT — turn Auto Ads OFF:** you enabled Auto Ads earlier ("Apply to site"). Auto Ads spams a banner between every card (the whole-screen mess you saw) AND double-runs with the manual banners. Fix:
+   - AdSense → **Ads → By site** → click the pencil/edit on `ddailyduel.pages.dev` → toggle **Auto ads OFF** → **Apply to site**
+   - Only the 3 manual banners should remain.
 7. Ads appear on: homepage, practice page, duel page. Nothing shows until step 6 is done — that's intentional.
 
 ## 2. Cloudflare Web Analytics (free, cookie-free) — 2 min
@@ -99,7 +101,7 @@ Do these AFTER steps 2 & 3. Suggested order:
 | Mobile layout 375px+ | DONE |
 | Share links + og preview card | DONE |
 | Privacy policy | DONE (live at /privacy) |
-| AdSense | client id wired + verification live; WAITING on Google review, then paste slot (step 6a) |
+| AdSense | client + slot (1301972363) wired, ads.txt live; WAITING on you to turn Auto Ads OFF (step 6) |
 | Analytics | WAITING ON YOU — step 2 |
 | Phone test | WAITING ON YOU — step 3 |
 | Custom domain | optional — step 4 |

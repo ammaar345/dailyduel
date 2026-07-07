@@ -1,20 +1,16 @@
 import { useEffect, useRef, memo } from 'react'
 
 /**
- * Google AdSense banner — chosen over Carbon Ads (Carbon requires 10k monthly views).
- * AdSense has no traffic minimum, just a site review.
+ * Google AdSense banner (manual placement — chosen over Auto Ads, which spammed
+ * a banner between every card on this single-screen app).
  *
- * Setup:
- * 1. Sign up at https://adsense.google.com — add site ddailyduel.pages.dev
- *    (site must be live and needs a privacy policy page for approval)
- * 2. After approval: AdSense > Ads > By ad unit > Display ads > create unit
- * 3. Replace ADSENSE_CLIENT with your ca-pub-XXXXXXXXXXXXXXXX
- * 4. Replace ADSENSE_SLOT with the ad unit's slot number
- *
- * Renders nothing until both IDs are configured.
+ * Live: client ca-pub-4302153561917574, unit "dailyduel-banner" slot 1301972363.
+ * The adsbygoogle.js loader lives in index.html <head>; this just requests a fill.
+ * Ads only serve on the approved live domain — on localhost the slot stays blank.
+ * Renders nothing until both IDs are non-placeholder.
  */
 const ADSENSE_CLIENT = 'ca-pub-4302153561917574'
-const ADSENSE_SLOT = 'XXXXXXXXXX' // TODO: create ad unit after approval, paste slot number here
+const ADSENSE_SLOT = '1301972363' // dailyduel-banner display unit
 
 const configured = !ADSENSE_CLIENT.includes('X') && !ADSENSE_SLOT.includes('X')
 
