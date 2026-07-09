@@ -526,7 +526,14 @@ export function HomePage({ stats, settings, onNavigate, onSettings, challenge, o
         </div>
 
         {/* Bottom tagline */}
-        <p className="text-[10px] text-[#A0AEC0]/50 tracking-widest uppercase font-medium mb-4">new puzzle daily at midnight</p>
+        <p className="text-[10px] text-[#A0AEC0]/50 tracking-widest uppercase font-medium mb-3">new puzzle daily at midnight</p>
+
+        {/* Footer links */}
+        <footer className="flex items-center gap-4 text-[11px] text-[#A0AEC0] mb-4">
+          <a href="/how-to-play.html" className="hover:text-[#64B5F6] transition-colors">How to Play</a>
+          <a href="/about.html" className="hover:text-[#64B5F6] transition-colors">About</a>
+          <a href="/privacy.html" className="hover:text-[#64B5F6] transition-colors">Privacy</a>
+        </footer>
       </div>
 
       {/* Right rail — countdown + duel log */}
